@@ -1,6 +1,6 @@
 // Updated App.jsx
 import { Routes, Route, Link, Navigate } from 'react-router-dom';
-import MlbPage from './components/MlbPage.jsx'
+import MlbPage from './Components/MlbPage'
 
 
 function App() {

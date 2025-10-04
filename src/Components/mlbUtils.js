@@ -1,7 +1,7 @@
 // components/mlbUtils.js
 
 export const teamColors = {
-  ARI: { dark: '#A71930', light: '#E3D4AD' },
+  AZ: { dark: '#A71930', light: '#E3D4AD' },
   ATL: { dark: '#13274F', light: '#CE1141' },
   BAL: { dark: '#000000', light: '#DF4601' },
   BOS: { dark: '#0C2340', light: '#BD3039' },

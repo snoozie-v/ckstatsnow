@@ -17,7 +17,7 @@ function App() {
   <main className="container mx-auto p-4 flex-grow">
     <Routes>
       <Route path="/" element={<Navigate to="/mlb" />} />
-      <Route path="/mlb" element={<MlbPage />} />
+      <Route path="/mlb/:view?" element={<MlbPage />} />
       {/* <Route path="/nfl" element={<NflPage />} /> */}
       {/* <Route path="/ncaa" element={<NcaaPage />} /> */}
     </Routes>

@@ -1,41 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-// import { teamColors, getGradient } from './mlbUtils';
+import { teamColors, getGradient } from './mlbUtils';
 
 // Constants
-const teamColors = {
-  AZ: { dark: '#A71930', light: '#E3D4AD' },
-  ATL: { dark: '#13274F', light: '#CE1141' },
-  BAL: { dark: '#000000', light: '#DF4601' },
-  BOS: { dark: '#0C2340', light: '#BD3039' },
-  CHC: { dark: '#0E3386', light: '#CC3433' },
-  CWS: { dark: '#27251F', light: '#C4CED4' },
-  CIN: { dark: '#000000', light: '#C6011F' },
-  CLE: { dark: '#00385D', light: '#E50022' },
-  COL: { dark: '#333366', light: '#C4CED4' },
-  DET: { dark: '#0C2340', light: '#FA4616' },
-  HOU: { dark: '#002D62', light: '#EB6E1F' },
-  KC: { dark: '#004687', light: '#BD9B60' },
-  LAA: { dark: '#003263', light: '#BA0021' },
-  LAD: { dark: '#005A9C', light: '#A5ACAF' },
-  MIA: { dark: '#EF3340', light: '#00A3E0' },
-  MIL: { dark: '#12284B', light: '#FFC52F' },
-  MIN: { dark: '#002B5C', light: '#D31145' },
-  NYM: { dark: '#002D72', light: '#FF5910' },
-  NYY: { dark: '#003087', light: '#C4CED3' },
-  ATH: { dark: '#1d9a8bff', light: '#EFB21E' },
-  PHI: { dark: '#002D72', light: '#E81828' },
-  PIT: { dark: '#27251F', light: '#FDB827' },
-  SD: { dark: '#2F241D', light: '#FFC425' },
-  SF: { dark: '#27251F', light: '#FD5A1E' },
-  SEA: { dark: '#0C2C56', light: '#005C5C' },
-  STL: { dark: '#0C2340', light: '#C41E3A' },
-  TB: { dark: '#092C5C', light: '#8FBCE6' },
-  TEX: { dark: '#003278', light: '#C0111F' },
-  TOR: { dark: '#1D2D5C', light: '#134A8E' },
-  WSH: { dark: '#14225A', light: '#AB0003' },
-};
-
 const hittingCategories = [
   { displayName: 'Home Runs', valueKey: 'homeRuns', order: 'desc' },
   { displayName: 'Batting Average', valueKey: 'avg', order: 'desc' },
@@ -58,16 +25,6 @@ const pitchingCategories = [
 ];
 
 // Utility Functions
-const getGradient = (teamAbbr) => {
-    console.log(teamAbbr)
-  const abbr = teamAbbr.toUpperCase();
-  const colors = teamColors[abbr];
-  if (!colors) {
-    return 'linear-gradient(to right, #6b7280, #9ca3af)';
-  }
-  return `linear-gradient(to right, ${colors.dark}, ${colors.light})`;
-};
-
 const parseStat = (value) => {
   if (value === '-' || value === null || value === undefined) return null;
   const num = parseFloat(value);
@@ -93,6 +50,14 @@ const formatForApi = (isoDate) => {
 const formatForDisplay = (isoDate) => {
   const [y, m, d] = isoDate.split('-');
   return `${m}/${d}/${y}`;
+};
+
+const hasHittingStats = (stats) => {
+  return parseInt(stats.atBats || 0) > 0;
+};
+
+const hasPitchingStats = (stats) => {
+  return parseInt(stats.gamesPitched || 0) > 0;
 };
 
 // Sub-Component: PlayerSelector
@@ -198,12 +163,17 @@ const PlayerComparison = () => {
   const [suggestions2, setSuggestions2] = useState([]);
   const [allTeams, setAllTeams] = useState({});
   const [year, setYear] = useState(new Date().getFullYear().toString());
-  const [startDate, setStartDate] = useState('2025-04-01');
-  const [endDate, setEndDate] = useState('2025-10-01');
+  const [useDateRange, setUseDateRange] = useState(false);
+  const [startDate, setStartDate] = useState(`${new Date().getFullYear()}-04-01`);
+  const [endDate, setEndDate] = useState(`${new Date().getFullYear()}-10-01`);
+  const [tempStartDate, setTempStartDate] = useState(startDate);
+  const [tempEndDate, setTempEndDate] = useState(endDate);
   const [stats1, setStats1] = useState({ hitting: {}, pitching: {} });
   const [stats2, setStats2] = useState({ hitting: {}, pitching: {} });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [gameType, setGameType] = useState('R');
+  const [selectedLeague, setSelectedLeague] = useState('MLB');
 
   const fetchAllTeams = async () => {
     try {
@@ -328,9 +298,21 @@ const PlayerComparison = () => {
     if (!playerId) return;
     setLoading(true);
     try {
-      const apiStartDate = formatForApi(startDate);
-      const apiEndDate = formatForApi(endDate);
-      const baseUrl = `https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=byDateRange&gameType=R&season=${year}&startDate=${apiStartDate}&endDate=${apiEndDate}`;
+      let statsParam = 'season';
+      let dateParams = '';
+      if (useDateRange) {
+        statsParam = 'byDateRange';
+        const apiStartDate = formatForApi(startDate);
+        const apiEndDate = formatForApi(endDate);
+        dateParams = `&startDate=${apiStartDate}&endDate=${apiEndDate}`;
+      }
+      let leagueParam = '';
+      if (selectedLeague === 'AL') {
+        leagueParam = '&leagueIds=103';
+      } else if (selectedLeague === 'NL') {
+        leagueParam = '&leagueIds=104';
+      }
+      const baseUrl = `https://statsapi.mlb.com/api/v1/people/${playerId}/stats?stats=${statsParam}&gameType=${gameType}&season=${year}${dateParams}${leagueParam}`;
       const [hittingRes, pitchingRes] = await Promise.all([
         axios.get(`${baseUrl}&group=hitting`),
         axios.get(`${baseUrl}&group=pitching`),
@@ -350,11 +332,28 @@ const PlayerComparison = () => {
 
   useEffect(() => {
     fetchPlayerStats(player1.id, setStats1);
-  }, [player1.id, year, startDate, endDate]);
+  }, [player1.id, year, useDateRange, startDate, endDate, gameType, selectedLeague]);
 
   useEffect(() => {
     fetchPlayerStats(player2.id, setStats2);
-  }, [player2.id, year, startDate, endDate]);
+  }, [player2.id, year, useDateRange, startDate, endDate, gameType, selectedLeague]);
+
+  useEffect(() => {
+    setStartDate(`${year}-04-01`);
+    setEndDate(`${year}-10-01`);
+    setTempStartDate(`${year}-04-01`);
+    setTempEndDate(`${year}-10-01`);
+  }, [year]);
+
+  useEffect(() => {
+    setTempStartDate(startDate);
+    setTempEndDate(endDate);
+  }, [useDateRange, startDate, endDate]);
+
+  const applyDateRange = () => {
+    setStartDate(tempStartDate);
+    setEndDate(tempEndDate);
+  };
 
   const displayPeriod = `${formatForDisplay(startDate)} to ${formatForDisplay(endDate)}`;
 
@@ -364,7 +363,7 @@ const PlayerComparison = () => {
         <div className="text-lg font-bold text-blue-900">Player Comparison</div>
         <div className="flex space-x-4 text-sm">
           <span>Year: {year}</span>
-          <span>Period: {displayPeriod}</span>
+          {useDateRange && <span>Period: {displayPeriod}</span>}
         </div>
       </div>
 
@@ -396,21 +395,55 @@ const PlayerComparison = () => {
             <option key={y} value={y.toString()}>{y}</option>
           ))}
         </select>
-        <label className="whitespace-nowrap">Start Date: </label>
+        <label className="whitespace-nowrap">Game Type: </label>
+        <select value={gameType} onChange={(e) => setGameType(e.target.value)} className="p-1 border rounded">
+          <option value="R">Regular Season</option>
+          <option value="P">Postseason</option>
+        </select>
+        <label className="whitespace-nowrap">League: </label>
+        <select value={selectedLeague} onChange={(e) => setSelectedLeague(e.target.value)} className="p-1 border rounded">
+          <option value="MLB">MLB</option>
+          <option value="AL">AL</option>
+          <option value="NL">NL</option>
+        </select>
+      </div>
+
+      <div className="mb-4 flex items-center justify-center">
+        <label className="mr-2">Use Custom Date Range:</label>
         <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="p-1 border rounded"
-        />
-        <label className="whitespace-nowrap">End Date: </label>
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          className="p-1 border rounded"
+          type="checkbox"
+          checked={useDateRange}
+          onChange={(e) => setUseDateRange(e.target.checked)}
         />
       </div>
+      {useDateRange && (
+        <div className="flex justify-center space-x-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Start Date:</label>
+            <input
+              type="date"
+              value={tempStartDate}
+              onChange={(e) => setTempStartDate(e.target.value)}
+              className="p-1 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">End Date:</label>
+            <input
+              type="date"
+              value={tempEndDate}
+              onChange={(e) => setTempEndDate(e.target.value)}
+              className="p-1 border rounded"
+            />
+          </div>
+          <button
+            onClick={applyDateRange}
+            className="p-1 bg-blue-500 text-white rounded mt-6"
+          >
+            Apply
+          </button>
+        </div>
+      )}
 
       {loading && <p className="text-center text-gray-600">Loading comparison...</p>}
       {error && <p className="text-center text-red-600">{error}</p>}
@@ -423,21 +456,25 @@ const PlayerComparison = () => {
             <PlayerHeader player={player2} />
           </div>
 
-          <StatsTable
-            categories={hittingCategories}
-            stats1={stats1.hitting}
-            stats2={stats2.hitting}
-            player1={player1}
-            player2={player2}
-          />
+          {(hasHittingStats(stats1.hitting) || hasHittingStats(stats2.hitting)) && (
+            <StatsTable
+              categories={hittingCategories}
+              stats1={stats1.hitting}
+              stats2={stats2.hitting}
+              player1={player1}
+              player2={player2}
+            />
+          )}
         
-          <StatsTable
-            categories={pitchingCategories}
-            stats1={stats1.pitching}
-            stats2={stats2.pitching}
-            player1={player1}
-            player2={player2}
-          />
+          {(hasPitchingStats(stats1.pitching) || hasPitchingStats(stats2.pitching)) && (
+            <StatsTable
+              categories={pitchingCategories}
+              stats1={stats1.pitching}
+              stats2={stats2.pitching}
+              player1={player1}
+              player2={player2}
+            />
+          )}
 
         </div>
       ) : (

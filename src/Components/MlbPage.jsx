@@ -1,6 +1,6 @@
-// Updated MlbPage.jsx (now passing league prop to preserve existing sub-component functionality)
 // Place this in ./components/MlbPage.jsx
-import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Standings from './Standings'; // Existing MLB-compatible component
 import Leaders from './Leaders'; // Existing MLB-compatible component
 import Scores from './Scores'; // Existing MLB-compatible component
@@ -8,50 +8,60 @@ import PlayerComparison from './PlayerComparison';
 import TeamComparison from './TeamComparison';
 
 const MlbPage = () => {
-  const [view, setView] = useState('standings');
+  const { view: paramView } = useParams();
+  const currentView = paramView || 'standings';
+  const navigate = useNavigate();
   const title = 'MLB';
   const league = 'mlb'; // Hardcode for MLB
+
+  // Redirect if invalid view
+  useEffect(() => {
+    const validViews = ['standings', 'scores', 'leaders', 'comparison', 'teamcomparison'];
+    if (!validViews.includes(currentView)) {
+      navigate('/mlb/standings', { replace: true });
+    }
+  }, [currentView, navigate]);
 
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
       <div className="flex space-x-4 mb-4 overflow-x-auto">
         <button
-          onClick={() => setView('standings')}
-          className={`px-4 py-2 rounded whitespace-nowrap ${view === 'standings' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          onClick={() => navigate('/mlb/standings')}
+          className={`px-4 py-2 rounded whitespace-nowrap ${currentView === 'standings' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
         >
           Standings
         </button>
         <button
-          onClick={() => setView('scores')}
-          className={`px-4 py-2 rounded whitespace-nowrap ${view === 'scores' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          onClick={() => navigate('/mlb/scores')}
+          className={`px-4 py-2 rounded whitespace-nowrap ${currentView === 'scores' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
         >
           Scores
         </button>
         <button
-          onClick={() => setView('leaders')}
-          className={`px-4 py-2 rounded whitespace-nowrap ${view === 'leaders' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          onClick={() => navigate('/mlb/leaders')}
+          className={`px-4 py-2 rounded whitespace-nowrap ${currentView === 'leaders' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
         >
           Leaders
         </button>
         <button
-          onClick={() => setView('comparison')}
-          className={`px-4 py-2 rounded whitespace-nowrap ${view === 'comparison' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          onClick={() => navigate('/mlb/comparison')}
+          className={`px-4 py-2 rounded whitespace-nowrap ${currentView === 'comparison' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
         >
           Player Comparison
         </button>
         <button
-          onClick={() => setView('teamcomparison')}
-          className={`px-4 py-2 rounded whitespace-nowrap ${view === 'teamcomparison' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          onClick={() => navigate('/mlb/teamcomparison')}
+          className={`px-4 py-2 rounded whitespace-nowrap ${currentView === 'teamcomparison' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
         >
           Team Comparison
         </button>
       </div>
-      {view === 'standings' && <Standings league={league} />}
-      {view === 'scores' && <Scores league={league} />}
-      {view === 'leaders' && <Leaders league={league} />}
-      {view === 'comparison' && <PlayerComparison league={league} />}
-      {view === 'teamcomparison' && <TeamComparison league={league} />}
+      {currentView === 'standings' && <Standings league={league} />}
+      {currentView === 'scores' && <Scores league={league} />}
+      {currentView === 'leaders' && <Leaders league={league} />}
+      {currentView === 'comparison' && <PlayerComparison league={league} />}
+      {currentView === 'teamcomparison' && <TeamComparison league={league} />}
     </div>
   );
 };

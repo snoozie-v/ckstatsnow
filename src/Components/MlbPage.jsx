@@ -7,7 +7,6 @@ import Scores from './Scores'; // Existing MLB-compatible component
 import PlayerComparison from './PlayerComparison';
 import TeamComparison from './TeamComparison';
 
-
 const MlbPage = () => {
   const [view, setView] = useState('standings');
   const title = 'MLB';
@@ -16,34 +15,34 @@ const MlbPage = () => {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      <div className="flex space-x-4 mb-4">
+      <div className="flex space-x-4 mb-4 overflow-x-auto">
         <button
           onClick={() => setView('standings')}
-          className={`px-4 py-2 rounded ${view === 'standings' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          className={`px-4 py-2 rounded whitespace-nowrap ${view === 'standings' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
         >
           Standings
         </button>
         <button
           onClick={() => setView('scores')}
-          className={`px-4 py-2 rounded ${view === 'scores' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          className={`px-4 py-2 rounded whitespace-nowrap ${view === 'scores' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
         >
           Scores
         </button>
         <button
           onClick={() => setView('leaders')}
-          className={`px-4 py-2 rounded ${view === 'leaders' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          className={`px-4 py-2 rounded whitespace-nowrap ${view === 'leaders' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
         >
           Leaders
         </button>
         <button
           onClick={() => setView('comparison')}
-          className={`px-4 py-2 rounded ${view === 'leaders' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          className={`px-4 py-2 rounded whitespace-nowrap ${view === 'comparison' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
         >
           Player Comparison
         </button>
         <button
           onClick={() => setView('teamcomparison')}
-          className={`px-4 py-2 rounded ${view === 'leaders' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          className={`px-4 py-2 rounded whitespace-nowrap ${view === 'teamcomparison' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
         >
           Team Comparison
         </button>

@@ -16,6 +16,7 @@ const Scores = () => {
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(getLocalDate());
   const [selectedGame, setSelectedGame] = useState(null);
+  const [isWideScreen, setIsWideScreen] = useState(typeof window !== 'undefined' ? window.innerWidth >= 768 : false);
 
   const formatDateForESPN = (dateStr) => {
     const [year, month, day] = dateStr.split('-').map(Number);
@@ -57,6 +58,15 @@ const Scores = () => {
     const interval = setInterval(fetchScores, 300000);
     return () => clearInterval(interval);
   }, [selectedDate]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsWideScreen(window.innerWidth >= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (loading) return <p className="text-center text-gray-600">Loading scores...</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
@@ -100,7 +110,7 @@ const Scores = () => {
           }
           return 'Unknown Status';
         }}
-        gridLayout={true}
+        gridLayout={isWideScreen}
       />
       <GameModal selectedGame={selectedGame} onClose={() => setSelectedGame(null)} />
     </div>

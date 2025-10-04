@@ -38,7 +38,7 @@ const Leaders = () => {
     { sortStat: 'wins', displayName: 'Wins', valueKey: 'wins', group: 'pitching', order: 'desc' },
     { sortStat: 'era', displayName: 'ERA', valueKey: 'era', group: 'pitching', order: 'asc' },
     { sortStat: 'strikeOuts', displayName: 'Strikeouts', valueKey: 'strikeOuts', group: 'pitching', order: 'desc' },
-    { sortStat: 'saves', displayName: 'Saves', valueKey: 'saves', group: 'pitching', order: 'desc' },
+    // { sortStat: 'saves', displayName: 'Saves', valueKey: 'saves', group: 'pitching', order: 'desc' },
     { sortStat: 'whip', displayName: 'WHIP', valueKey: 'whip', group: 'pitching', order: 'asc' },
     { sortStat: 'inningsPitched', displayName: 'Innings Pitched', valueKey: 'inningsPitched', group: 'pitching', order: 'desc' },
   ];
@@ -280,53 +280,55 @@ const Leaders = () => {
                 <div className="text-lg font-bold text-blue-900">ckstats</div>
                 <h2 className="text-xl font-semibold">{cat?.displayName}</h2>
               </div>
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cat?.displayName}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {statLeaders.map((leader, idx) => {
-                    const hasMapping = leader.playerId && idMap.has(leader.playerId);
-                    if (!hasMapping && leader.playerId) {
-                      console.log(`No mapping found for player: ${leader.name} (ID: ${leader.playerId})`);
-                    }
-                    return (
-                      <tr key={idx}>
-                        <td className="px-6 py-4 whitespace-nowrap">{idx + 1}</td>
-                        <td className="px-6 py-4">
-                          <img 
-                            src={`https://a.espncdn.com/i/teamlogos/mlb/500/${leader.team.toLowerCase()}.png`} 
-                            alt={`${leader.team} logo`} 
-                            className="w-8 h-8 object-contain" 
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          {hasMapping ? (
-                            <a
-                              href={`https://www.baseball-reference.com/players/${idMap.get(leader.playerId).charAt(0)}/${idMap.get(leader.playerId)}.shtml`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
-                            >
-                              {leader.name || 'Unknown'}
-                            </a>
-                          ) : (
-                            leader.name || 'Unknown'
-                          )}
-                        </td>
-                        <td className="px-6 py-4">{leader.team || '-'}</td>
-                        <td className="px-6 py-4">{leader.value || '-'}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 table-auto">
+                  <thead>
+                    <tr>
+                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Rank</th>
+                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6"></th>
+                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Player</th>
+                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Team</th>
+                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">{cat?.displayName}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {statLeaders.map((leader, idx) => {
+                      const hasMapping = leader.playerId && idMap.has(leader.playerId);
+                      if (!hasMapping && leader.playerId) {
+                        console.log(`No mapping found for player: ${leader.name} (ID: ${leader.playerId})`);
+                      }
+                      return (
+                        <tr key={idx}>
+                          <td className="px-2 py-4 whitespace-nowrap md:px-6">{idx + 1}</td>
+                          <td className="px-2 py-4 md:px-6">
+                            <img 
+                              src={`https://a.espncdn.com/i/teamlogos/mlb/500/${leader.team.toLowerCase()}.png`} 
+                              alt={`${leader.team} logo`} 
+                              className="w-6 h-6 object-contain md:w-8 md:h-8" 
+                            />
+                          </td>
+                          <td className="px-2 py-4 md:px-6">
+                            {hasMapping ? (
+                              <a
+                                href={`https://www.baseball-reference.com/players/${idMap.get(leader.playerId).charAt(0)}/${idMap.get(leader.playerId)}.shtml`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                {leader.name || 'Unknown'}
+                              </a>
+                            ) : (
+                              leader.name || 'Unknown'
+                            )}
+                          </td>
+                          <td className="px-2 py-4 md:px-6">{leader.team || '-'}</td>
+                          <td className="px-2 py-4 md:px-6">{leader.value || '-'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
               <p className="text-center text-xs text-gray-500 px-4 py-2">
                 Data via MLB Stats API © MLBAM
               </p>

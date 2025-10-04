@@ -38,7 +38,7 @@ const Leaders = () => {
     { sortStat: 'wins', displayName: 'Wins', valueKey: 'wins', group: 'pitching', order: 'desc' },
     { sortStat: 'era', displayName: 'ERA', valueKey: 'era', group: 'pitching', order: 'asc' },
     { sortStat: 'strikeOuts', displayName: 'Strikeouts', valueKey: 'strikeOuts', group: 'pitching', order: 'desc' },
-    // { sortStat: 'saves', displayName: 'Saves', valueKey: 'saves', group: 'pitching', order: 'desc' },
+    { sortStat: 'saves', displayName: 'Saves', valueKey: 'saves', group: 'pitching', order: 'desc' },
     { sortStat: 'whip', displayName: 'WHIP', valueKey: 'whip', group: 'pitching', order: 'asc' },
     { sortStat: 'inningsPitched', displayName: 'Innings Pitched', valueKey: 'inningsPitched', group: 'pitching', order: 'desc' },
   ];

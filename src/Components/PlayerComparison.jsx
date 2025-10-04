@@ -431,13 +431,13 @@ const PlayerComparison = () => {
             player2={player2}
           />
         
-          {/* <StatsTable
+          <StatsTable
             categories={pitchingCategories}
             stats1={stats1.pitching}
             stats2={stats2.pitching}
             player1={player1}
             player2={player2}
-          /> */}
+          />
 
         </div>
       ) : (

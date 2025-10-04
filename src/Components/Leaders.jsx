@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import Papa from 'papaparse';
 
 const Leaders = () => {
-  const [leaders, setLeaders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [statLeaders, setStatLeaders] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedLeague, setSelectedLeague] = useState('MLB');
   const [year, setYear] = useState(new Date().getFullYear().toString());
@@ -13,6 +14,12 @@ const Leaders = () => {
   const [tempStartDate, setTempStartDate] = useState(startDate);
   const [tempEndDate, setTempEndDate] = useState(endDate);
   const [gameType, setGameType] = useState('R');
+  const [idMap, setIdMap] = useState(new Map());
+  const [idMapError, setIdMapError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(''); // Default to empty
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const limit = 10;
 
   const hittingCategories = [
     { sortStat: 'homeRuns', displayName: 'Home Runs', valueKey: 'homeRuns', group: 'hitting', order: 'desc' },
@@ -31,14 +38,62 @@ const Leaders = () => {
     { sortStat: 'wins', displayName: 'Wins', valueKey: 'wins', group: 'pitching', order: 'desc' },
     { sortStat: 'era', displayName: 'ERA', valueKey: 'era', group: 'pitching', order: 'asc' },
     { sortStat: 'strikeOuts', displayName: 'Strikeouts', valueKey: 'strikeOuts', group: 'pitching', order: 'desc' },
-    // { sortStat: 'saves', displayName: 'Saves', valueKey: 'saves', group: 'pitching', order: 'desc' },
+    { sortStat: 'saves', displayName: 'Saves', valueKey: 'saves', group: 'pitching', order: 'desc' },
     { sortStat: 'whip', displayName: 'WHIP', valueKey: 'whip', group: 'pitching', order: 'asc' },
     { sortStat: 'inningsPitched', displayName: 'Innings Pitched', valueKey: 'inningsPitched', group: 'pitching', order: 'desc' },
   ];
 
   const categories = [...hittingCategories, ...pitchingCategories];
 
+  useEffect(() => {
+    const fetchIdMap = async () => {
+      try {
+        const map = new Map();
+        const promises = [];
+
+        for (let i = 0; i < 16; i++) {
+          const suffix = i.toString(16);
+          const url = `https://raw.githubusercontent.com/chadwickbureau/register/master/data/people-${suffix}.csv`;
+          promises.push(
+            axios.get(url).then(response => {
+              return new Promise((resolve, reject) => {
+                Papa.parse(response.data, {
+                  header: true,
+                  skipEmptyLines: true,
+                  complete: (results) => {
+                    results.data.forEach(row => {
+                      const mlbam = row.key_mlbam;
+                      const bbref = row.key_bbref;
+                      if (mlbam && bbref && !isNaN(mlbam)) {
+                        map.set(parseInt(mlbam), bbref);
+                      }
+                    });
+                    resolve();
+                  },
+                  error: (err) => reject(err),
+                });
+              });
+            })
+          );
+        }
+
+        await Promise.all(promises);
+        setIdMap(map);
+        console.log('idMap loaded successfully, size:', map.size);
+      } catch (err) {
+        const errorMsg = 'Failed to fetch or parse ID map: ' + err.message;
+        setIdMapError(errorMsg);
+        console.error(errorMsg, err);
+      }
+    };
+    fetchIdMap();
+  }, []);
+
   const fetchLeaders = async () => {
+    if (!selectedCategory) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       let leagueParam = '';
@@ -56,35 +111,42 @@ const Leaders = () => {
         dateParams = `&startDate=${startDate}&endDate=${endDate}`;
       }
 
-      const promises = categories.map(cat =>
-        axios.get(`https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?env=prod&sportId=1&gameType=${gameType}&group=${cat.group}&sortStat=${cat.sortStat}&order=${cat.order}&season=${year}&limit=10&offset=0&stats=${statsParam}&playerPool=${playerPoolParam}${dateParams}${leagueParam}`)
-      );
+      const cat = categories.find(c => c.sortStat === selectedCategory);
+      if (!cat) {
+        throw new Error('Selected category not found');
+      }
 
-      const responses = await Promise.all(promises);
-      const data = responses.map((response, index) => {
-        const players = response.data.stats || [];
-        const cat = categories[index];
-        const leaders = players.map(player => ({
-          name: player.playerFullName,
-          team: player.teamAbbrev,
-          value: player[cat.valueKey]
-        }));
-        return { ...cat, leaders };
-      });
+      const response = await axios.get(`https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?env=prod&sportId=1&gameType=${gameType}&group=${cat.group}&sortStat=${cat.sortStat}&order=${cat.order}&season=${year}&limit=${limit}&offset=${offset}&stats=${statsParam}&playerPool=${playerPoolParam}${dateParams}${leagueParam}`);
 
-      setLeaders(data);
+      const players = response.data.stats || [];
+      const newLeaders = players.map(player => ({
+        name: player.playerFullName,
+        team: player.teamAbbrev,
+        value: player[cat.valueKey],
+        playerId: player.playerId,
+      }));
+
+      setStatLeaders(prev => offset === 0 ? newLeaders : [...prev, ...newLeaders]);
+      setHasMore(newLeaders.length === limit);
       setLoading(false);
     } catch (err) {
-      setError('Failed to fetch leaders');
+      setError('Failed to fetch leaders: ' + err.message);
       setLoading(false);
+      console.error('Failed to fetch leaders', err);
     }
   };
+
+  useEffect(() => {
+    setOffset(0);
+    setStatLeaders([]);
+    setHasMore(true);
+  }, [selectedLeague, year, useDateRange, startDate, endDate, gameType, selectedCategory]);
 
   useEffect(() => {
     fetchLeaders();
     const interval = setInterval(fetchLeaders, 300000); // Refresh every 5 minutes
     return () => clearInterval(interval);
-  }, [selectedLeague, year, useDateRange, startDate, endDate, gameType]);
+  }, [selectedLeague, year, useDateRange, startDate, endDate, gameType, selectedCategory, offset]);
 
   useEffect(() => {
     setStartDate(`${year}-04-01`);
@@ -103,12 +165,17 @@ const Leaders = () => {
     setEndDate(tempEndDate);
   };
 
-  if (loading) return <p className="text-center text-gray-600">Loading leaders...</p>;
+  const loadMore = () => {
+    setOffset(prev => prev + limit);
+  };
+
   if (error) return <p className="text-center text-red-600">{error}</p>;
-  if (!leaders || leaders.length === 0) return <p className="text-center text-gray-600">No leaders data available for this season.</p>;
+
+  const cat = categories.find(c => c.sortStat === selectedCategory);
 
   return (
     <div>
+      {idMapError && <p className="text-center text-red-600 mb-4">{idMapError}</p>}
       <div className="mb-4 flex items-center justify-center">
         <label htmlFor="yearFilter" className="mr-2 text-lg font-medium">Year:</label>
         <select
@@ -148,6 +215,22 @@ const Leaders = () => {
         </select>
       </div>
       <div className="mb-4 flex items-center justify-center">
+        <label htmlFor="categoryFilter" className="mr-2 text-lg font-medium">Select Stat:</label>
+        <select
+          id="categoryFilter"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="p-2 border border-gray-300 rounded-md"
+        >
+          <option value="" disabled>Select Stat</option>
+          {categories.map((cat) => (
+            <option key={cat.sortStat} value={cat.sortStat}>
+              {cat.displayName}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="mb-4 flex items-center justify-center">
         <label className="mr-2">Use Custom Date Range:</label>
         <input
           type="checkbox"
@@ -183,37 +266,85 @@ const Leaders = () => {
           </button>
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {leaders.map((cat, index) => (
-          <div key={cat.sortStat} className="bg-white shadow-md rounded-lg overflow-hidden">
-            <div className="flex justify-between items-center bg-blue-100 py-2 px-4">
-              <div className="text-lg font-bold text-blue-900">ckstats</div>
-              <h2 className="text-xl font-semibold">{cat.displayName}</h2>
-            </div>
-            <table className="min-w-full divide-y divide-gray-200">
-              <tbody>
-                {cat.leaders.map((leader, idx) => (
-                  <tr key={idx}>
-                    <td className="px-6 py-4">
-                      <img 
-                        src={`https://a.espncdn.com/i/teamlogos/mlb/500/${leader.team.toLowerCase()}.png`} 
-                        alt={`${leader.team} logo`} 
-                        className="w-8 h-8 object-contain" 
-                      />
-                    </td>
-                    <td className="px-6 py-4">{leader.name || 'Unknown'}</td>
-                    <td className="px-6 py-4">{leader.team || '-'}</td>
-                    <td className="px-6 py-4">{leader.value || '-'}</td>
+      {!selectedCategory ? (
+        <p className="text-center text-gray-600">Select a stat to view leaders.</p>
+      ) : loading && offset === 0 ? (
+        <p className="text-center text-gray-600">Loading leaders...</p>
+      ) : statLeaders.length === 0 ? (
+        <p className="text-center text-gray-600">No leaders data available for this selection.</p>
+      ) : (
+        <div className="max-w-2xl mx-auto">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+              <div className="flex justify-between items-center bg-blue-100 py-2 px-4">
+                <div className="text-lg font-bold text-blue-900">ckstats</div>
+                <h2 className="text-xl font-semibold">{cat?.displayName}</h2>
+              </div>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cat?.displayName}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <p className="text-center text-xs text-gray-500 px-4 py-2">
-              Data via MLB Stats API © MLBAM
-            </p>
+                </thead>
+                <tbody>
+                  {statLeaders.map((leader, idx) => {
+                    const hasMapping = leader.playerId && idMap.has(leader.playerId);
+                    if (!hasMapping && leader.playerId) {
+                      console.log(`No mapping found for player: ${leader.name} (ID: ${leader.playerId})`);
+                    }
+                    return (
+                      <tr key={idx}>
+                        <td className="px-6 py-4 whitespace-nowrap">{idx + 1}</td>
+                        <td className="px-6 py-4">
+                          <img 
+                            src={`https://a.espncdn.com/i/teamlogos/mlb/500/${leader.team.toLowerCase()}.png`} 
+                            alt={`${leader.team} logo`} 
+                            className="w-8 h-8 object-contain" 
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          {hasMapping ? (
+                            <a
+                              href={`https://www.baseball-reference.com/players/${idMap.get(leader.playerId).charAt(0)}/${idMap.get(leader.playerId)}.shtml`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              {leader.name || 'Unknown'}
+                            </a>
+                          ) : (
+                            leader.name || 'Unknown'
+                          )}
+                        </td>
+                        <td className="px-6 py-4">{leader.team || '-'}</td>
+                        <td className="px-6 py-4">{leader.value || '-'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <p className="text-center text-xs text-gray-500 px-4 py-2">
+                Data via MLB Stats API © MLBAM
+              </p>
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+      {hasMore && selectedCategory && (
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={loadMore}
+            className="p-2 bg-blue-500 text-white rounded"
+            disabled={loading}
+          >
+            {loading ? 'Loading...' : 'Load More'}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

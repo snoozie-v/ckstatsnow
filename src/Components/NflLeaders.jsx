@@ -7,7 +7,7 @@ const NflLeaders = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Example: Fetch NFL leaders from your sports API
+
     // Replace with actual API calls, e.g., fetch('https://api.sportsdata.io/v3/nfl/stats/json/PassingLeaders/2025REG')
     Promise.all([
       fetchNFLPassingLeaders(),

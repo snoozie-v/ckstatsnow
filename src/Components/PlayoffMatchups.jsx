@@ -125,7 +125,10 @@ const PlayoffMatchups = () => {
             winnerMessage = `${winner.name} win the series ${seriesScore}`;
           }
           return (
-            <div key={index} className={`${isOver ? 'bg-green-200' : 'bg-white'} shadow-md rounded-lg overflow-hidden p-4`}>
+            <div
+              key={index}
+              className={`${isOver ? 'bg-green-200' : 'bg-white'} shadow-md rounded-lg overflow-hidden p-4 ${gameType === 'W' ? 'sm:col-span-2' : ''}`}
+            >
               <h2 className="text-lg font-semibold mb-2">{leagueName ? leagueName + ' ' : ''}{roundName}{statusText}</h2>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">

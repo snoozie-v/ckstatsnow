@@ -24,7 +24,7 @@ const GameList = ({ games, onGameClick, getStatusColor, getStatusContent, gridLa
               className={`border-b pb-2 hover:bg-gray-200 cursor-pointer rounded-md ${getStatusColor(game)} h-32 flex items-center justify-center`}
               onClick={() => onGameClick(game.id)}
             >
-              <div className="flex flex-col items-center text-center p-2 text-gray-800">
+              <div className="flex flex-col items-center text-center p-2 pt-4 text-gray-800">
                 <div className="flex items-center mb-2">
                   <img
                     src={`https://a.espncdn.com/i/teamlogos/mlb/500/${game.competitions[0].competitors[0].team.abbreviation.toLowerCase()}.png`}

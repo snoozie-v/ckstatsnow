@@ -4,6 +4,7 @@ import Papa from 'papaparse';
 
 const Leaders = () => {
   const [statLeaders, setStatLeaders] = useState([]);
+  const [allLeaders, setAllLeaders] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedLeague, setSelectedLeague] = useState('MLB');
@@ -94,8 +95,9 @@ const Leaders = () => {
       setLoading(false);
       return;
     }
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
       let leagueParam = '';
       if (selectedLeague === 'AL') {
         leagueParam = '&leagueIds=103';
@@ -111,23 +113,43 @@ const Leaders = () => {
         dateParams = `&startDate=${startDate}&endDate=${endDate}`;
       }
 
-      const cat = categories.find(c => c.sortStat === selectedCategory);
-      if (!cat) {
-        throw new Error('Selected category not found');
+      if (selectedCategory === 'all') {
+        const fetches = categories.map(async (cat) => {
+          const response = await axios.get(`https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?env=prod&sportId=1&gameType=${gameType}&group=${cat.group}&sortStat=${cat.sortStat}&order=${cat.order}&season=${year}&limit=${limit}&offset=0&stats=${statsParam}&playerPool=${playerPoolParam}${dateParams}${leagueParam}`);
+          const players = response.data.stats || [];
+          const newLeaders = players.map(player => ({
+            name: player.playerFullName,
+            team: player.teamAbbrev,
+            value: player[cat.valueKey],
+            playerId: player.playerId,
+          }));
+          return { sortStat: cat.sortStat, leaders: newLeaders };
+        });
+        const results = await Promise.all(fetches);
+        const newAllLeaders = {};
+        results.forEach(result => {
+          newAllLeaders[result.sortStat] = result.leaders;
+        });
+        setAllLeaders(newAllLeaders);
+        setStatLeaders([]);
+        setHasMore(false);
+      } else {
+        const cat = categories.find(c => c.sortStat === selectedCategory);
+        if (!cat) {
+          throw new Error('Selected category not found');
+        }
+        const response = await axios.get(`https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?env=prod&sportId=1&gameType=${gameType}&group=${cat.group}&sortStat=${cat.sortStat}&order=${cat.order}&season=${year}&limit=${limit}&offset=${offset}&stats=${statsParam}&playerPool=${playerPoolParam}${dateParams}${leagueParam}`);
+        const players = response.data.stats || [];
+        const newLeaders = players.map(player => ({
+          name: player.playerFullName,
+          team: player.teamAbbrev,
+          value: player[cat.valueKey],
+          playerId: player.playerId,
+        }));
+        setStatLeaders(prev => offset === 0 ? newLeaders : [...prev, ...newLeaders]);
+        setHasMore(newLeaders.length === limit);
+        setAllLeaders({});
       }
-
-      const response = await axios.get(`https://bdfed.stitch.mlbinfra.com/bdfed/stats/player?env=prod&sportId=1&gameType=${gameType}&group=${cat.group}&sortStat=${cat.sortStat}&order=${cat.order}&season=${year}&limit=${limit}&offset=${offset}&stats=${statsParam}&playerPool=${playerPoolParam}${dateParams}${leagueParam}`);
-
-      const players = response.data.stats || [];
-      const newLeaders = players.map(player => ({
-        name: player.playerFullName,
-        team: player.teamAbbrev,
-        value: player[cat.valueKey],
-        playerId: player.playerId,
-      }));
-
-      setStatLeaders(prev => offset === 0 ? newLeaders : [...prev, ...newLeaders]);
-      setHasMore(newLeaders.length === limit);
       setLoading(false);
     } catch (err) {
       setError('Failed to fetch leaders: ' + err.message);
@@ -139,6 +161,7 @@ const Leaders = () => {
   useEffect(() => {
     setOffset(0);
     setStatLeaders([]);
+    setAllLeaders({});
     setHasMore(true);
   }, [selectedLeague, year, useDateRange, startDate, endDate, gameType, selectedCategory]);
 
@@ -169,9 +192,74 @@ const Leaders = () => {
     setOffset(prev => prev + limit);
   };
 
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  const renderTable = (cat, leaders, idxOffset = 0) => {
+    return (
+      <div key={cat.sortStat} className="mb-8">
+        <div className="grid grid-cols-1 gap-4">
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="flex justify-between items-center bg-blue-100 py-2 px-4">
+              <div className="text-lg font-bold text-blue-900">ckstats</div>
+              <h2 className="text-xl font-semibold">{cat.displayName}</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 table-auto">
+                <thead>
+                  <tr>
+                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Rank</th>
+                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6"></th>
+                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Player</th>
+                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Team</th>
+                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">{cat.displayName}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaders.map((leader, idx) => {
+                    const hasMapping = leader.playerId && idMap.has(leader.playerId);
+                    if (!hasMapping && leader.playerId) {
+                      console.log(`No mapping found for player: ${leader.name} (ID: ${leader.playerId})`);
+                    }
+                    return (
+                      <tr key={idx}>
+                        <td className="px-2 py-4 whitespace-nowrap md:px-6">{idx + 1 + idxOffset}</td>
+                        <td className="px-2 py-4 md:px-6">
+                          <img 
+                            src={`https://a.espncdn.com/i/teamlogos/mlb/500/${leader.team.toLowerCase()}.png`} 
+                            alt={`${leader.team} logo`} 
+                            className="w-6 h-6 object-contain md:w-8 md:h-8" 
+                          />
+                        </td>
+                        <td className="px-2 py-4 md:px-6">
+                          {hasMapping ? (
+                            <a
+                              href={`https://www.baseball-reference.com/players/${idMap.get(leader.playerId).charAt(0)}/${idMap.get(leader.playerId)}.shtml`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              {leader.name || 'Unknown'}
+                            </a>
+                          ) : (
+                            leader.name || 'Unknown'
+                          )}
+                        </td>
+                        <td className="px-2 py-4 md:px-6">{leader.team || '-'}</td>
+                        <td className="px-2 py-4 md:px-6">{leader.value || '-'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-center text-xs text-gray-500 px-4 py-2">
+              Data via MLB Stats API © MLBAM
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
-  const cat = categories.find(c => c.sortStat === selectedCategory);
+  if (error) return <p className="text-center text-red-600">{error}</p>;
 
   return (
     <div>
@@ -223,6 +311,7 @@ const Leaders = () => {
           className="p-2 border border-gray-300 rounded-md"
         >
           <option value="" disabled>Select Stat</option>
+          <option value="all">All Categories</option>
           {categories.map((cat) => (
             <option key={cat.sortStat} value={cat.sortStat}>
               {cat.displayName}
@@ -268,75 +357,28 @@ const Leaders = () => {
       )}
       {!selectedCategory ? (
         <p className="text-center text-gray-600">Select a stat to view leaders.</p>
-      ) : loading && offset === 0 ? (
+      ) : loading ? (
         <p className="text-center text-gray-600">Loading leaders...</p>
+      ) : selectedCategory === 'all' ? (
+        Object.keys(allLeaders).length === 0 ? (
+          <p className="text-center text-gray-600">No leaders data available for this selection.</p>
+        ) : (
+          <div className="max-w-2xl mx-auto">
+            {categories.map((cat) => {
+              const leaders = allLeaders[cat.sortStat] || [];
+              if (leaders.length === 0) return null;
+              return renderTable(cat, leaders);
+            })}
+          </div>
+        )
       ) : statLeaders.length === 0 ? (
         <p className="text-center text-gray-600">No leaders data available for this selection.</p>
       ) : (
         <div className="max-w-2xl mx-auto">
-          <div className="grid grid-cols-1 gap-4">
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
-              <div className="flex justify-between items-center bg-blue-100 py-2 px-4">
-                <div className="text-lg font-bold text-blue-900">ckstats</div>
-                <h2 className="text-xl font-semibold">{cat?.displayName}</h2>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 table-auto">
-                  <thead>
-                    <tr>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Rank</th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6"></th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Player</th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Team</th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">{cat?.displayName}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {statLeaders.map((leader, idx) => {
-                      const hasMapping = leader.playerId && idMap.has(leader.playerId);
-                      if (!hasMapping && leader.playerId) {
-                        console.log(`No mapping found for player: ${leader.name} (ID: ${leader.playerId})`);
-                      }
-                      return (
-                        <tr key={idx}>
-                          <td className="px-2 py-4 whitespace-nowrap md:px-6">{idx + 1}</td>
-                          <td className="px-2 py-4 md:px-6">
-                            <img 
-                              src={`https://a.espncdn.com/i/teamlogos/mlb/500/${leader.team.toLowerCase()}.png`} 
-                              alt={`${leader.team} logo`} 
-                              className="w-6 h-6 object-contain md:w-8 md:h-8" 
-                            />
-                          </td>
-                          <td className="px-2 py-4 md:px-6">
-                            {hasMapping ? (
-                              <a
-                                href={`https://www.baseball-reference.com/players/${idMap.get(leader.playerId).charAt(0)}/${idMap.get(leader.playerId)}.shtml`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
-                              >
-                                {leader.name || 'Unknown'}
-                              </a>
-                            ) : (
-                              leader.name || 'Unknown'
-                            )}
-                          </td>
-                          <td className="px-2 py-4 md:px-6">{leader.team || '-'}</td>
-                          <td className="px-2 py-4 md:px-6">{leader.value || '-'}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              <p className="text-center text-xs text-gray-500 px-4 py-2">
-                Data via MLB Stats API © MLBAM
-              </p>
-            </div>
-          </div>
+          {renderTable(categories.find(c => c.sortStat === selectedCategory), statLeaders, offset)}
         </div>
       )}
-      {hasMore && selectedCategory && (
+      {hasMore && selectedCategory && selectedCategory !== 'all' && (
         <div className="flex justify-center mt-4">
           <button
             onClick={loadMore}

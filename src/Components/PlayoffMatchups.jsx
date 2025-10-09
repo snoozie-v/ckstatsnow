@@ -100,9 +100,10 @@ const PlayoffMatchups = () => {
           let awayWins = 0;
           seriesItem.games.forEach(game => {
             if (game.status.abstractGameState === 'Final') {
-              if (game.teams.home.isWinner) {
+              const winnerId = game.teams.home.isWinner ? game.teams.home.team.id : game.teams.away.team.id;
+              if (winnerId === homeTeam.id) {
                 homeWins++;
-              } else if (game.teams.away.isWinner) {
+              } else {
                 awayWins++;
               }
             }

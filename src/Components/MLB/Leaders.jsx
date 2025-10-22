@@ -229,18 +229,27 @@ const Leaders = () => {
                           />
                         </td>
                         <td className="px-2 py-4 md:px-6">
-                          {hasMapping ? (
-                            <a
-                              href={`https://www.baseball-reference.com/players/${idMap.get(leader.playerId).charAt(0)}/${idMap.get(leader.playerId)}.shtml`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
-                            >
-                              {leader.name || 'Unknown'}
-                            </a>
-                          ) : (
-                            leader.name || 'Unknown'
-                          )}
+                          <div className="flex items-center">
+                            {leader.playerId && (
+                              <img
+                                src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic-sit:headshot:67:current.png/w_213,q_auto:best/v1/people/${leader.playerId}/headshot/67/current`}
+                                alt={`${leader.name} headshot`}
+                                className="w-8 h-8 rounded-full mr-2 object-cover"
+                              />
+                            )}
+                            {hasMapping ? (
+                              <a
+                                href={`https://www.baseball-reference.com/players/${idMap.get(leader.playerId).charAt(0)}/${idMap.get(leader.playerId)}.shtml`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                {leader.name || 'Unknown'}
+                              </a>
+                            ) : (
+                              leader.name || 'Unknown'
+                            )}
+                          </div>
                         </td>
                         <td className="px-2 py-4 md:px-6">{leader.team || '-'}</td>
                         <td className="px-2 py-4 md:px-6">{leader.value || '-'}</td>

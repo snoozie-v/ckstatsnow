@@ -2,7 +2,7 @@
 // Place this in ./components/NflScores.jsx
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import WeekSelector from './WeekSelector';
+import WeekSelector from '../Utilities/WeekSelector';
 
 const NflScores = () => {
   const [games, setGames] = useState([]);

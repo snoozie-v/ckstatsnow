@@ -1,6 +1,7 @@
 // Updated App.jsx
 import { Routes, Route, Link, Navigate } from 'react-router-dom';
-import MlbPage from './Components/MlbPage'
+import MlbPage from './Components/MLB/MlbPage'
+import NflPage from './Components/NFL/NflPage'
 
 
 function App() {
@@ -10,7 +11,7 @@ function App() {
     <h1 className="text-2xl font-bold">ckstats</h1>
     <nav className="flex space-x-4">
       <Link to="/mlb" className="text-sm hover:underline">MLB</Link>
-      {/* <Link to="/nfl" className="text-sm hover:underline">NFL</Link> */}
+      <Link to="/nfl" className="text-sm hover:underline">NFL</Link>
       {/* <Link to="/ncaa" className="text-sm hover:underline">NCAA FB</Link> */}
     </nav>
   </header>
@@ -18,7 +19,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/mlb" />} />
       <Route path="/mlb/:view?" element={<MlbPage />} />
-      {/* <Route path="/nfl" element={<NflPage />} /> */}
+      <Route path="/nfl" element={<NflPage />} />
       {/* <Route path="/ncaa" element={<NcaaPage />} /> */}
     </Routes>
   </main>

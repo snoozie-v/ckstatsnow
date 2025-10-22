@@ -1,18 +1,20 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { getGradient } from './mlbUtils';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { getGradient } from "../MLB/mlbUtils";
 
 const TeamComparison = () => {
-  const [team1, setTeam1] = useState({ id: null, name: '', abbrev: '' });
-  const [team2, setTeam2] = useState({ id: null, name: '', abbrev: '' });
-  const [search1, setSearch1] = useState('');
-  const [search2, setSearch2] = useState('');
+  const [team1, setTeam1] = useState({ id: null, name: "", abbrev: "" });
+  const [team2, setTeam2] = useState({ id: null, name: "", abbrev: "" });
+  const [search1, setSearch1] = useState("");
+  const [search2, setSearch2] = useState("");
   const [suggestions1, setSuggestions1] = useState([]);
   const [suggestions2, setSuggestions2] = useState([]);
   const [allTeams, setAllTeams] = useState([]);
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [useDateRange, setUseDateRange] = useState(false);
-  const [startDate, setStartDate] = useState(`${new Date().getFullYear()}-04-01`);
+  const [startDate, setStartDate] = useState(
+    `${new Date().getFullYear()}-04-01`
+  );
   const [endDate, setEndDate] = useState(`${new Date().getFullYear()}-10-01`);
   const [tempStartDate, setTempStartDate] = useState(startDate);
   const [tempEndDate, setTempEndDate] = useState(endDate);
@@ -20,42 +22,46 @@ const TeamComparison = () => {
   const [stats2, setStats2] = useState({ hitting: {}, pitching: {} });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [gameType, setGameType] = useState('R');
-  const [selectedLeague, setSelectedLeague] = useState('MLB');
+  const [gameType, setGameType] = useState("R");
+  const [selectedLeague, setSelectedLeague] = useState("MLB");
 
   const hittingCategories = [
-    { displayName: 'Home Runs', valueKey: 'homeRuns', order: 'desc' },
-    { displayName: 'Batting Average', valueKey: 'avg', order: 'desc' },
-    { displayName: 'Runs Batted In', valueKey: 'rbi', order: 'desc' },
-    { displayName: 'Hits', valueKey: 'hits', order: 'desc' },
-    { displayName: 'Doubles', valueKey: 'doubles', order: 'desc' },
-    { displayName: 'Triples', valueKey: 'triples', order: 'desc' },
-    { displayName: 'Stolen Bases', valueKey: 'stolenBases', order: 'desc' },
-    { displayName: 'On-Base Percentage', valueKey: 'obp', order: 'desc' },
-    { displayName: 'Slugging Percentage', valueKey: 'slg', order: 'desc' },
-    { displayName: 'OPS', valueKey: 'ops', order: 'desc' },
+    { displayName: "Home Runs", valueKey: "homeRuns", order: "desc" },
+    { displayName: "Batting Average", valueKey: "avg", order: "desc" },
+    { displayName: "Runs Batted In", valueKey: "rbi", order: "desc" },
+    { displayName: "Hits", valueKey: "hits", order: "desc" },
+    { displayName: "Doubles", valueKey: "doubles", order: "desc" },
+    { displayName: "Triples", valueKey: "triples", order: "desc" },
+    { displayName: "Stolen Bases", valueKey: "stolenBases", order: "desc" },
+    { displayName: "On-Base Percentage", valueKey: "obp", order: "desc" },
+    { displayName: "Slugging Percentage", valueKey: "slg", order: "desc" },
+    { displayName: "OPS", valueKey: "ops", order: "desc" },
   ];
 
   const pitchingCategories = [
-    { displayName: 'Wins', valueKey: 'wins', order: 'desc' },
-    { displayName: 'ERA', valueKey: 'era', order: 'asc' },
-    { displayName: 'Strikeouts', valueKey: 'strikeOuts', order: 'desc' },
-    { displayName: 'WHIP', valueKey: 'whip', order: 'asc' },
-    { displayName: 'Innings Pitched', valueKey: 'inningsPitched', order: 'desc' },
+    { displayName: "Wins", valueKey: "wins", order: "desc" },
+    { displayName: "ERA", valueKey: "era", order: "asc" },
+    { displayName: "Strikeouts", valueKey: "strikeOuts", order: "desc" },
+    { displayName: "WHIP", valueKey: "whip", order: "asc" },
+    {
+      displayName: "Innings Pitched",
+      valueKey: "inningsPitched",
+      order: "desc",
+    },
   ];
 
   const formatForApi = (isoDate) => {
-    const [y, m, d] = isoDate.split('-');
-    return `${m.padStart(2, '0')}/${d.padStart(2, '0')}/${y}`;
+    const [y, m, d] = isoDate.split("-");
+    return `${m.padStart(2, "0")}/${d.padStart(2, "0")}/${y}`;
   };
 
   const formatForDisplay = (isoDate) => {
-    const [y, m, d] = isoDate.split('-');
+    const [y, m, d] = isoDate.split("-");
     return `${m}/${d}/${y}`;
   };
 
   const parseStat = (value) => {
-    if (value === '-' || value === null || value === undefined) return null;
+    if (value === "-" || value === null || value === undefined) return null;
     const num = parseFloat(value);
     return isNaN(num) ? null : num;
   };
@@ -64,7 +70,7 @@ const TeamComparison = () => {
     if (myNum === null && oppNum === null) return false;
     if (myNum === null) return false;
     if (oppNum === null) return true;
-    if (order === 'desc') {
+    if (order === "desc") {
       return myNum > oppNum;
     } else {
       return myNum < oppNum;
@@ -84,7 +90,7 @@ const TeamComparison = () => {
       );
       setAllTeams(mlbTeams);
     } catch (err) {
-      console.error('Failed to fetch teams:', err);
+      console.error("Failed to fetch teams:", err);
     }
   };
 
@@ -94,11 +100,13 @@ const TeamComparison = () => {
 
   useEffect(() => {
     if (search1.length >= 2) {
-      const filtered = allTeams.filter(
-        (team) =>
-          team.name.toLowerCase().includes(search1.toLowerCase()) ||
-          team.abbreviation.toLowerCase().includes(search1.toLowerCase())
-      ).slice(0, 5);
+      const filtered = allTeams
+        .filter(
+          (team) =>
+            team.name.toLowerCase().includes(search1.toLowerCase()) ||
+            team.abbreviation.toLowerCase().includes(search1.toLowerCase())
+        )
+        .slice(0, 5);
       setSuggestions1(filtered);
     } else {
       setSuggestions1([]);
@@ -107,11 +115,13 @@ const TeamComparison = () => {
 
   useEffect(() => {
     if (search2.length >= 2) {
-      const filtered = allTeams.filter(
-        (team) =>
-          team.name.toLowerCase().includes(search2.toLowerCase()) ||
-          team.abbreviation.toLowerCase().includes(search2.toLowerCase())
-      ).slice(0, 5);
+      const filtered = allTeams
+        .filter(
+          (team) =>
+            team.name.toLowerCase().includes(search2.toLowerCase()) ||
+            team.abbreviation.toLowerCase().includes(search2.toLowerCase())
+        )
+        .slice(0, 5);
       setSuggestions2(filtered);
     } else {
       setSuggestions2([]);
@@ -124,7 +134,7 @@ const TeamComparison = () => {
       name: team.name,
       abbrev: team.abbreviation,
     });
-    setSearch1('');
+    setSearch1("");
     setSuggestions1([]);
   };
 
@@ -134,39 +144,39 @@ const TeamComparison = () => {
       name: team.name,
       abbrev: team.abbreviation,
     });
-    setSearch2('');
+    setSearch2("");
     setSuggestions2([]);
   };
 
   const clearTeam1 = () => {
-    setTeam1({ id: null, name: '', abbrev: '' });
+    setTeam1({ id: null, name: "", abbrev: "" });
     setStats1({ hitting: {}, pitching: {} });
-    setSearch1('');
+    setSearch1("");
   };
 
   const clearTeam2 = () => {
-    setTeam2({ id: null, name: '', abbrev: '' });
+    setTeam2({ id: null, name: "", abbrev: "" });
     setStats2({ hitting: {}, pitching: {} });
-    setSearch2('');
+    setSearch2("");
   };
 
   const fetchTeamStats = async (teamId, setter) => {
     if (!teamId) return;
     setLoading(true);
     try {
-      let statsParam = 'season';
-      let dateParams = '';
+      let statsParam = "season";
+      let dateParams = "";
       if (useDateRange) {
-        statsParam = 'byDateRange';
+        statsParam = "byDateRange";
         const apiStartDate = formatForApi(startDate);
         const apiEndDate = formatForApi(endDate);
         dateParams = `&startDate=${apiStartDate}&endDate=${apiEndDate}`;
       }
-      let leagueParam = '';
-      if (selectedLeague === 'AL') {
-        leagueParam = '&leagueIds=103';
-      } else if (selectedLeague === 'NL') {
-        leagueParam = '&leagueIds=104';
+      let leagueParam = "";
+      if (selectedLeague === "AL") {
+        leagueParam = "&leagueIds=103";
+      } else if (selectedLeague === "NL") {
+        leagueParam = "&leagueIds=104";
       }
       const baseUrl = `https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=${statsParam}&gameType=${gameType}&season=${year}${dateParams}${leagueParam}`;
       const [hittingRes, pitchingRes] = await Promise.all([
@@ -178,8 +188,8 @@ const TeamComparison = () => {
       setter({ hitting: hittingData, pitching: pitchingData });
       setError(null);
     } catch (err) {
-      console.error('Stats fetch error:', err);
-      setError('Failed to fetch team stats');
+      console.error("Stats fetch error:", err);
+      setError("Failed to fetch team stats");
       setter({ hitting: {}, pitching: {} });
     } finally {
       setLoading(false);
@@ -188,11 +198,27 @@ const TeamComparison = () => {
 
   useEffect(() => {
     fetchTeamStats(team1.id, setStats1);
-  }, [team1.id, year, useDateRange, startDate, endDate, gameType, selectedLeague]);
+  }, [
+    team1.id,
+    year,
+    useDateRange,
+    startDate,
+    endDate,
+    gameType,
+    selectedLeague,
+  ]);
 
   useEffect(() => {
     fetchTeamStats(team2.id, setStats2);
-  }, [team2.id, year, useDateRange, startDate, endDate, gameType, selectedLeague]);
+  }, [
+    team2.id,
+    year,
+    useDateRange,
+    startDate,
+    endDate,
+    gameType,
+    selectedLeague,
+  ]);
 
   useEffect(() => {
     setStartDate(`${year}-04-01`);
@@ -212,10 +238,12 @@ const TeamComparison = () => {
   };
 
   const getValue = (groupData, key) => {
-    return groupData[key] ?? '-';
+    return groupData[key] ?? "-";
   };
 
-  const displayPeriod = `${formatForDisplay(startDate)} to ${formatForDisplay(endDate)}`;
+  const displayPeriod = `${formatForDisplay(startDate)} to ${formatForDisplay(
+    endDate
+  )}`;
 
   return (
     <div className="space-y-6">
@@ -301,18 +329,32 @@ const TeamComparison = () => {
 
       <div className="flex flex-wrap items-center space-x-4">
         <label className="whitespace-nowrap">Year: </label>
-        <select value={year} onChange={(e) => setYear(e.target.value)} className="p-1 border rounded">
+        <select
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          className="p-1 border rounded"
+        >
           {[2023, 2024, 2025].map((y) => (
-            <option key={y} value={y.toString()}>{y}</option>
+            <option key={y} value={y.toString()}>
+              {y}
+            </option>
           ))}
         </select>
         <label className="whitespace-nowrap">Game Type: </label>
-        <select value={gameType} onChange={(e) => setGameType(e.target.value)} className="p-1 border rounded">
+        <select
+          value={gameType}
+          onChange={(e) => setGameType(e.target.value)}
+          className="p-1 border rounded"
+        >
           <option value="R">Regular Season</option>
           <option value="P">Postseason</option>
         </select>
         <label className="whitespace-nowrap">League: </label>
-        <select value={selectedLeague} onChange={(e) => setSelectedLeague(e.target.value)} className="p-1 border rounded">
+        <select
+          value={selectedLeague}
+          onChange={(e) => setSelectedLeague(e.target.value)}
+          className="p-1 border rounded"
+        >
           <option value="MLB">MLB</option>
           <option value="AL">AL</option>
           <option value="NL">NL</option>
@@ -330,7 +372,9 @@ const TeamComparison = () => {
       {useDateRange && (
         <div className="flex justify-center space-x-4 mb-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Start Date:</label>
+            <label className="block text-sm font-medium mb-1">
+              Start Date:
+            </label>
             <input
               type="date"
               value={tempStartDate}
@@ -356,13 +400,17 @@ const TeamComparison = () => {
         </div>
       )}
 
-      {loading && <p className="text-center text-gray-600">Loading comparison...</p>}
+      {loading && (
+        <p className="text-center text-gray-600">Loading comparison...</p>
+      )}
       {error && <p className="text-center text-red-600">{error}</p>}
 
       {team1.id && team2.id ? (
         <div className="border-4 border-sky-800">
           <div className="grid grid-cols-3">
-            <div className="bg-sky-800 text-white py-4 px-6 flex items-center justify-center">ckstats</div>
+            <div className="bg-sky-800 text-white py-4 px-6 flex items-center justify-center">
+              ckstats
+            </div>
             <div className="text-center bg-blue-100 p-4 rounded">
               <h3 className="text-xl font-semibold">{team1.name}</h3>
               {team1.abbrev && (
@@ -401,14 +449,26 @@ const TeamComparison = () => {
                         {cat.displayName}
                       </td>
                       <td
-                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${leads1 ? 'text-white' : 'text-gray-500'}`}
-                        style={{ background: leads1 ? getGradient(team1.abbrev) : 'transparent' }}
+                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${
+                          leads1 ? "text-white" : "text-gray-500"
+                        }`}
+                        style={{
+                          background: leads1
+                            ? getGradient(team1.abbrev)
+                            : "transparent",
+                        }}
                       >
                         {val1}
                       </td>
                       <td
-                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${leads2 ? 'text-white' : 'text-gray-500'}`}
-                        style={{ background: leads2 ? getGradient(team2.abbrev) : 'transparent' }}
+                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${
+                          leads2 ? "text-white" : "text-gray-500"
+                        }`}
+                        style={{
+                          background: leads2
+                            ? getGradient(team2.abbrev)
+                            : "transparent",
+                        }}
                       >
                         {val2}
                       </td>
@@ -435,14 +495,26 @@ const TeamComparison = () => {
                         {cat.displayName}
                       </td>
                       <td
-                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${leads1 ? 'text-white' : 'text-gray-500'}`}
-                        style={{ background: leads1 ? getGradient(team1.abbrev) : 'transparent' }}
+                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${
+                          leads1 ? "text-white" : "text-gray-500"
+                        }`}
+                        style={{
+                          background: leads1
+                            ? getGradient(team1.abbrev)
+                            : "transparent",
+                        }}
                       >
                         {val1}
                       </td>
                       <td
-                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${leads2 ? 'text-white' : 'text-gray-500'}`}
-                        style={{ background: leads2 ? getGradient(team2.abbrev) : 'transparent' }}
+                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${
+                          leads2 ? "text-white" : "text-gray-500"
+                        }`}
+                        style={{
+                          background: leads2
+                            ? getGradient(team2.abbrev)
+                            : "transparent",
+                        }}
                       >
                         {val2}
                       </td>
@@ -458,7 +530,9 @@ const TeamComparison = () => {
           </p>
         </div>
       ) : (
-        <p className="text-center text-gray-600">Select two teams to compare their stats.</p>
+        <p className="text-center text-gray-600">
+          Select two teams to compare their stats.
+        </p>
       )}
     </div>
   );

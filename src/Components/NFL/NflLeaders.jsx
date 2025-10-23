@@ -1,7 +1,7 @@
 // Basic NflLeaders.jsx - Displays top 10 leaders in all categories for 2025 regular season NFL overall
 // Place this in ./components/NFL/NflLeaders.jsx
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { fetchNflFantasyLeaders } from "../../api/espn";
 
 const NflLeaders = () => {
   const [allLeaders, setAllLeaders] = useState({}); // For 'all' view
@@ -164,14 +164,8 @@ const NflLeaders = () => {
     const fetchAllPlayers = async () => {
       try {
         const statEntryId = "00" + year;
-        const url = `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/players?view=kona_player_info`;
-        const headers = {
-          "X-Fantasy-Filter": JSON.stringify({
-            players: { limit: 2000, filterActive: { value: true } },
-          }),
-        };
-        const response = await axios.get(url, { headers });
-        let players = (response.data || [])
+        const response = await fetchNflFantasyLeaders(year);
+        let players = (response || [])
           .map((p) => {
             const seasonStats =
               p.stats?.find((s) => s.id === statEntryId) || {};

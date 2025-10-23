@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import DateSelector from "../Utilities/DateSelector";
 import GameList from "./GameList";
-import GameModal from "./GameModal";
+import GameModal from "../Utilities/GameModal";
 import useFetchScores from "../../hooks/useFetchScores"; // Assuming you create this hook
 
 const Scores = () => {
@@ -110,7 +110,13 @@ const Scores = () => {
       <GameModal
         selectedGame={selectedGame}
         onClose={() => setSelectedGame(null)}
-      />
+        getTeamInfo={(competitor) => ({
+          name: competitor.team.displayName,
+          logo: `https://a.espncdn.com/i/teamlogos/mlb/500/${competitor.team.abbreviation.toLowerCase()}.png`,
+        })}
+      >
+        {/* We can add MlbGameDetails here in the future if needed */}
+      </GameModal>
     </div>
   );
 };

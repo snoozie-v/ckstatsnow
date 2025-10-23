@@ -1,11 +1,12 @@
 // Updated NflScores.jsx (fixed logo path to use team.logo from ESPN API)
 // Place this in ./components/NflScores.jsx
 import { useState, useEffect } from "react";
-import axios from "axios";
 import WeekSelector from "../Utilities/WeekSelector";
 import useFetchScores from "../../hooks/useFetchScores";
-import GameList from "../MLB/GameList";
-import GameModal from "../MLB/GameModal";
+import { fetchGameSummary } from "../../api/espn";
+import GameList from "../Utilities/GameList";
+import GameModal from "../Utilities/GameModal";
+import NflGameDetails from "./NflGameDetails";
 
 const NflScores = () => {
   const getInitialWeekStart = () => {
@@ -57,9 +58,8 @@ const NflScores = () => {
   const fetchGameDetails = async (eventId) => {
     try {
       setDetailsError(null);
-      const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${eventId}`;
-      const response = await axios.get(url);
-      setSelectedGame(response.data);
+      const gameData = await fetchGameSummary("football/nfl", eventId);
+      setSelectedGame(gameData);
     } catch (err) {
       setDetailsError("Failed to fetch game details.");
       setSelectedGame(null);
@@ -153,7 +153,13 @@ const NflScores = () => {
       <GameModal
         selectedGame={selectedGame}
         onClose={() => setSelectedGame(null)}
-      />
+        getTeamInfo={(competitor) => ({
+          name: competitor.team.displayName,
+          logo: competitor.team.logos?.[0]?.href || "", // Correct path for summary data
+        })}
+      >
+        <NflGameDetails details={selectedGame} />
+      </GameModal>
     </div>
   );
 };

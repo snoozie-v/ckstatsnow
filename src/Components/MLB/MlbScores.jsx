@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import DateSelector from "../Utilities/DateSelector";
-import GameList from "./GameList";
-import GameModal from "./GameModal";
+import GameList from "../Utilities/GameList";
+import GameModal from "../Utilities/GameModal";
 import useFetchScores from "../../hooks/useFetchScores"; // Assuming you create this hook
+import { fetchGameSummary } from "../../api/espn";
 
 const MlbScores = () => {
   const getLocalDate = () => {
@@ -25,9 +25,8 @@ const MlbScores = () => {
   const fetchGameDetails = async (eventId) => {
     try {
       setDetailsError(null); // Clear previous details error
-      const url = `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=${eventId}`;
-      const response = await axios.get(url);
-      setSelectedGame(response.data);
+      const gameData = await fetchGameSummary("baseball/mlb", eventId);
+      setSelectedGame(gameData);
     } catch (err) {
       setDetailsError("Failed to fetch game details.");
       setSelectedGame(null);
@@ -110,7 +109,13 @@ const MlbScores = () => {
       <GameModal
         selectedGame={selectedGame}
         onClose={() => setSelectedGame(null)}
-      />
+        getTeamInfo={(competitor) => ({
+          name: competitor.team.displayName,
+          logo: `https://a.espncdn.com/i/teamlogos/mlb/500/${competitor.team.abbreviation.toLowerCase()}.png`,
+        })}
+      >
+        {/* We can add MlbGameDetails here in the future if needed */}
+      </GameModal>
     </div>
   );
 };

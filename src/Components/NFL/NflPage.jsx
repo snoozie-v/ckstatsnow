@@ -1,40 +1,59 @@
 // New NflPage.jsx (similar structure, but will use NFL-specific components)
 // Place this in ./components/NflPage.jsx
-import { useState } from 'react';
-import NflStandings from './NflStandings';
-import NflScores from './NflScores';
-import NflLeaders from './NflLeaders';
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import NflStandings from "./NflStandings";
+import NflScores from "./NflScores";
+import NflLeaders from "./NflLeaders";
 
 const NflPage = () => {
-  const [view, setView] = useState('standings');
-  const title = 'NFL';
+  const { view: paramView } = useParams();
+  const currentView = paramView || "standings";
+  const navigate = useNavigate();
+  const title = "NFL";
+
+  // Redirect if invalid view
+  useEffect(() => {
+    const validViews = ["standings", "scores", "leaders"];
+    if (!validViews.includes(currentView)) {
+      navigate("/nfl/standings", { replace: true });
+    }
+  }, [currentView, navigate]);
 
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      <div className="flex space-x-4 mb-4">
+      <div className="flex space-x-4 mb-4 overflow-x-auto">
         <button
-          onClick={() => setView('standings')}
-          className={`px-4 py-2 rounded ${view === 'standings' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          onClick={() => navigate("/nfl/standings")}
+          className={`px-4 py-2 rounded whitespace-nowrap ${
+            currentView === "standings"
+              ? "bg-sky-600 text-white"
+              : "bg-gray-200"
+          }`}
         >
           Standings
         </button>
         <button
-          onClick={() => setView('scores')}
-          className={`px-4 py-2 rounded ${view === 'scores' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          onClick={() => navigate("/nfl/scores")}
+          className={`px-4 py-2 rounded whitespace-nowrap ${
+            currentView === "scores" ? "bg-sky-600 text-white" : "bg-gray-200"
+          }`}
         >
           Scores
         </button>
         <button
-          onClick={() => setView('leaders')}
-          className={`px-4 py-2 rounded ${view === 'leaders' ? 'bg-sky-600 text-white' : 'bg-gray-200'}`}
+          onClick={() => navigate("/nfl/leaders")}
+          className={`px-4 py-2 rounded whitespace-nowrap ${
+            currentView === "leaders" ? "bg-sky-600 text-white" : "bg-gray-200"
+          }`}
         >
           Leaders
         </button>
       </div>
-      {view === 'standings' && <NflStandings />}
-      {view === 'scores' && <NflScores />}
-      {view === 'leaders' && <NflLeaders />}
+      {currentView === "standings" && <NflStandings />}
+      {currentView === "scores" && <NflScores />}
+      {currentView === "leaders" && <NflLeaders />}
     </div>
   );
 };

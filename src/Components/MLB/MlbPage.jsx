@@ -2,10 +2,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import Standings from "../MLB/Standings"; // Existing MLB-compatible component
-import Leaders from "./Leaders"; // Existing MLB-compatible component
-import MlbScores from "./MlbScores"; // Existing MLB-compatible component
-import PlayerComparison from "../MLB/PlayerComparison";
-import TeamComparison from "../MLB/TeamComparison";
+import MlbScores from "./MlbScores";
+import MlbLeaders from "./MlbLeaders";
+import MlbPlayerComparison from "./MlbPlayerComparison";
+import MlbTeamComparison from "./MlbTeamComparison";
 
 const MlbPage = () => {
   const { view: paramView } = useParams();
@@ -81,11 +81,12 @@ const MlbPage = () => {
       </div>
       {currentView === "standings" && <Standings league={league} />}
       {currentView === "scores" && <MlbScores league={league} />}
-      {currentView === "leaders" && <Leaders league={league} />}
-      {currentView === "comparison" && <PlayerComparison league={league} />}
-      {currentView === "teamcomparison" && <TeamComparison league={league} />}
+      {currentView === "leaders" && <MlbLeaders league={league} />}
+      {currentView === "comparison" && <MlbPlayerComparison league={league} />}
+      {currentView === "teamcomparison" && (
+        <MlbTeamComparison league={league} />
+      )}
     </div>
   );
 };
-
 export default MlbPage;

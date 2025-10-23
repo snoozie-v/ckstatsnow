@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import Standings from "../MLB/Standings"; // Existing MLB-compatible component
 import Leaders from "./Leaders"; // Existing MLB-compatible component
-import Scores from "./Scores"; // Existing MLB-compatible component
+import MlbScores from "./MlbScores"; // Existing MLB-compatible component
 import PlayerComparison from "../MLB/PlayerComparison";
 import TeamComparison from "../MLB/TeamComparison";
 
@@ -80,7 +80,7 @@ const MlbPage = () => {
         </button>
       </div>
       {currentView === "standings" && <Standings league={league} />}
-      {currentView === "scores" && <Scores league={league} />}
+      {currentView === "scores" && <MlbScores league={league} />}
       {currentView === "leaders" && <Leaders league={league} />}
       {currentView === "comparison" && <PlayerComparison league={league} />}
       {currentView === "teamcomparison" && <TeamComparison league={league} />}

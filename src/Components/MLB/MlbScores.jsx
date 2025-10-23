@@ -5,7 +5,7 @@ import GameList from "./GameList";
 import GameModal from "./GameModal";
 import useFetchScores from "../../hooks/useFetchScores"; // Assuming you create this hook
 
-const Scores = () => {
+const MlbScores = () => {
   const getLocalDate = () => {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
@@ -115,4 +115,4 @@ const Scores = () => {
   );
 };
 
-export default Scores;
+export default MlbScores;

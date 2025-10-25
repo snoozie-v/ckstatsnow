@@ -24,6 +24,39 @@ const MlbLeaders = () => {
   const [hasMore, setHasMore] = useState(true);
   const limit = 10;
 
+  const teamAbbrevMap = new Map([
+    [108, 'LAA'],
+    [109, 'ARI'],
+    [110, 'BAL'],
+    [111, 'BOS'],
+    [112, 'CHC'],
+    [113, 'CIN'],
+    [114, 'CLE'],
+    [115, 'COL'],
+    [116, 'DET'],
+    [117, 'HOU'],
+    [118, 'KC'],
+    [119, 'LAD'],
+    [120, 'WSH'],
+    [121, 'NYM'],
+    [133, 'OAK'],
+    [134, 'PIT'],
+    [135, 'SD'],
+    [136, 'SEA'],
+    [137, 'SF'],
+    [138, 'STL'],
+    [139, 'TB'],
+    [140, 'TEX'],
+    [141, 'TOR'],
+    [142, 'MIN'],
+    [143, 'PHI'],
+    [144, 'ATL'],
+    [145, 'CWS'],
+    [146, 'MIA'],
+    [147, 'NYY'],
+    [158, 'MIL'],
+  ]);
+
   const hittingCategories = [
     {
       sortStat: "homeRuns",
@@ -145,41 +178,54 @@ const MlbLeaders = () => {
   const categories = [...hittingCategories, ...pitchingCategories];
 
   useEffect(() => {
-    const loadIdMap = async () => {
-      try {
-        const map = await fetchChadwickIdMap();
-        setIdMap(map);
-        console.log("idMap loaded successfully, size:", map.size);
-      } catch (err) {
-        const errorMsg = "Failed to fetch or parse ID map: " + err.message;
-        setIdMapError(errorMsg);
-        console.error(errorMsg, err);
-      }
-    };
+const loadIdMap = async () => {
+  const cachedMap = localStorage.getItem('chadwickIdMap');
+  if (cachedMap) {
+    try {
+      const entries = JSON.parse(cachedMap);
+      setIdMap(new Map(entries));
+      console.log("idMap loaded from cache, size:", entries.length);
+      return; // Exit early if cache hit
+    } catch (err) {
+      console.error("Failed to load cached idMap:", err);
+    }
+  }
+
+  try {
+    const map = await fetchChadwickIdMap();
+    setIdMap(map);
+    localStorage.setItem('chadwickIdMap', JSON.stringify(Array.from(map.entries())));
+    console.log("idMap loaded successfully and cached, size:", map.size);
+  } catch (err) {
+    const errorMsg = "Failed to fetch or parse ID map: " + err.message;
+    setIdMapError(errorMsg);
+    console.error(errorMsg, err);
+  }
+};
     loadIdMap();
   }, []);
 
   const fetchLeaders = async () => {
+    setLoading(true);
     if (!selectedCategory) {
       setLoading(false);
       return;
     }
-    setLoading(true);
     setError(null);
     try {
-      let league = "";
+      let leagueId = "";
       if (selectedLeague === "AL") {
-        league = "&leagueIds=103";
+        leagueId = "103";
       } else if (selectedLeague === "NL") {
-        league = "&leagueIds=104";
+        leagueId = "104";
+      } else {
+        leagueId = "103,104";
       }
 
       let stats = "season";
       let playerPool = gameType === "R" && !useDateRange ? "qualified" : "all";
-      let dates = "";
       if (useDateRange) {
         stats = "byDateRange";
-        dates = `&startDate=${startDate}&endDate=${endDate}`;
       }
 
       if (selectedCategory === "all") {
@@ -194,8 +240,9 @@ const MlbLeaders = () => {
             offset: 0,
             stats,
             playerPool,
-            dates,
-            league,
+            startDate: useDateRange ? startDate : undefined,
+            endDate: useDateRange ? endDate : undefined,
+            leagueId,
           });
           const newLeaders = players.map((player) => ({
             name: player.playerFullName,
@@ -228,8 +275,9 @@ const MlbLeaders = () => {
           offset,
           stats,
           playerPool,
-          dates,
-          league,
+          startDate: useDateRange ? startDate : undefined,
+          endDate: useDateRange ? endDate : undefined,
+          leagueId,
         });
         const newLeaders = players.map((player) => ({
           name: player.playerFullName,
@@ -256,6 +304,10 @@ const MlbLeaders = () => {
     setStatLeaders([]);
     setAllLeaders({});
     setHasMore(true);
+    
+    fetchLeaders();
+    const interval = setInterval(fetchLeaders, 300000);
+    return () => clearInterval(interval);
   }, [
     selectedLeague,
     year,
@@ -267,19 +319,10 @@ const MlbLeaders = () => {
   ]);
 
   useEffect(() => {
-    fetchLeaders();
-    const interval = setInterval(fetchLeaders, 300000); // Refresh every 5 minutes
-    return () => clearInterval(interval);
-  }, [
-    selectedLeague,
-    year,
-    useDateRange,
-    startDate,
-    endDate,
-    gameType,
-    selectedCategory,
-    offset,
-  ]);
+    if (offset > 0) {
+      fetchLeaders();
+    }
+  }, [offset]);
 
   useEffect(() => {
     setStartDate(`${year}-04-01`);
@@ -345,11 +388,13 @@ const MlbLeaders = () => {
                           {idx + 1 + idxOffset}
                         </td>
                         <td className="px-2 py-4 md:px-6">
-                          <img
-                            src={`https://a.espncdn.com/i/teamlogos/mlb/500/${leader.team.toLowerCase()}.png`}
-                            alt={`${leader.team} logo`}
-                            className="w-6 h-6 object-contain md:w-8 md:h-8"
-                          />
+                          {leader.team && (
+                            <img
+                              src={`https://a.espncdn.com/i/teamlogos/mlb/500/${leader.team.toLowerCase()}.png`}
+                              alt={`${leader.team} logo`}
+                              className="w-6 h-6 object-contain md:w-8 md:h-8"
+                            />
+                          )}
                         </td>
                         <td className="px-2 py-4 md:px-6">
                           <div className="flex items-center">

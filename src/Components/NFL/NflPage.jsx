@@ -5,6 +5,8 @@ import { useEffect } from "react";
 import NflStandings from "./NflStandings";
 import NflScores from "./NflScores";
 import NflLeaders from "./NflLeaders";
+import NflPlayerComparison from "./NflPlayerComparison";
+import NflTeamComparison from "./NflTeamComparison";
 
 const NflPage = () => {
   const { view: paramView } = useParams();
@@ -14,7 +16,13 @@ const NflPage = () => {
 
   // Redirect if invalid view
   useEffect(() => {
-    const validViews = ["standings", "scores", "leaders"];
+    const validViews = [
+      "standings",
+      "scores",
+      "leaders",
+      "player-comparison",
+      "team-comparison",
+    ];
     if (!validViews.includes(currentView)) {
       navigate("/nfl/standings", { replace: true });
     }
@@ -50,10 +58,32 @@ const NflPage = () => {
         >
           Leaders
         </button>
+        <button
+          onClick={() => navigate("/nfl/player-comparison")}
+          className={`px-4 py-2 rounded whitespace-nowrap ${
+            currentView === "player-comparison"
+              ? "bg-sky-600 text-white"
+              : "bg-gray-200"
+          }`}
+        >
+          Player Comparison
+        </button>
+        {/* <button
+          onClick={() => navigate("/nfl/team-comparison")}
+          className={`px-4 py-2 rounded whitespace-nowrap ${
+            currentView === "team-comparison"
+              ? "bg-sky-600 text-white"
+              : "bg-gray-200"
+          }`}
+        >
+          Team Comparison
+        </button> */}
       </div>
       {currentView === "standings" && <NflStandings />}
       {currentView === "scores" && <NflScores />}
       {currentView === "leaders" && <NflLeaders />}
+      {currentView === "player-comparison" && <NflPlayerComparison />}
+      {/* {currentView === "team-comparison" && <NflTeamComparison />} */}
     </div>
   );
 };

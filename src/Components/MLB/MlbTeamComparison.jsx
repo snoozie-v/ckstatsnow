@@ -2,6 +2,78 @@ import { useState, useEffect } from "react";
 import { getGradient } from "../MLB/mlbUtils";
 import { fetchMlbTeams, fetchMlbTeamStats } from "../../api/mlb"; // Correct import
 
+const hittingCategories = [
+  { displayName: "HR", valueKey: "homeRuns", order: "desc" },
+  { displayName: "AVG", valueKey: "avg", order: "desc" },
+  { displayName: "RBI", valueKey: "rbi", order: "desc" },
+  { displayName: "Hits", valueKey: "hits", order: "desc" },
+  { displayName: "Doubles", valueKey: "doubles", order: "desc" },
+  { displayName: "Triples", valueKey: "triples", order: "desc" },
+  { displayName: "SB", valueKey: "stolenBases", order: "desc" },
+  { displayName: "OBP", valueKey: "obp", order: "desc" },
+  { displayName: "Slugging", valueKey: "slg", order: "desc" },
+  { displayName: "OPS", valueKey: "ops", order: "desc" },
+];
+
+const pitchingCategories = [
+  { displayName: "Wins", valueKey: "wins", order: "desc" },
+  { displayName: "ERA", valueKey: "era", order: "asc" },
+  { displayName: "K", valueKey: "strikeOuts", order: "desc" },
+  { displayName: "WHIP", valueKey: "whip", order: "asc" },
+  { displayName: "IP", valueKey: "inningsPitched", order: "desc" },
+];
+
+const StatsTable = ({
+  categories,
+  stats1,
+  stats2,
+  team1,
+  team2,
+  parseStat,
+  isLeading,
+  getValue,
+}) => (
+  <table className="w-full table-fixed divide-y divide-gray-200 bg-white shadow-md rounded-lg overflow-hidden">
+    <tbody className="bg-white divide-y divide-gray-200">
+      {categories.map((cat) => {
+        const val1 = getValue(stats1, cat.valueKey);
+        const val2 = getValue(stats2, cat.valueKey);
+        const num1 = parseStat(val1);
+        const num2 = parseStat(val2);
+        const leads1 = isLeading(num1, num2, cat.order);
+        const leads2 = isLeading(num2, num1, cat.order);
+        return (
+          <tr key={cat.valueKey}>
+            <td className="px-4 py-2 text-lg font-medium text-gray-900 w-1/3 text-center">
+              {cat.displayName}
+            </td>
+            <td
+              className={`text-2xl px-4 py-2 font-semibold w-1/3 text-center ${
+                leads1 ? "text-white" : "text-gray-500"
+              }`}
+              style={{
+                background: leads1 ? getGradient(team1.abbrev) : "transparent",
+              }}
+            >
+              {val1}
+            </td>
+            <td
+              className={`text-2xl px-4 py-2 font-semibold w-1/3 text-center ${
+                leads2 ? "text-white" : "text-gray-500"
+              }`}
+              style={{
+                background: leads2 ? getGradient(team2.abbrev) : "transparent",
+              }}
+            >
+              {val2}
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+);
+
 const MlbTeamComparison = () => {
   const [team1, setTeam1] = useState({ id: null, name: "", abbrev: "" });
   const [team2, setTeam2] = useState({ id: null, name: "", abbrev: "" });
@@ -24,31 +96,6 @@ const MlbTeamComparison = () => {
   const [error, setError] = useState(null);
   const [gameType, setGameType] = useState("R");
   const [selectedLeague, setSelectedLeague] = useState("MLB");
-
-  const hittingCategories = [
-    { displayName: "Home Runs", valueKey: "homeRuns", order: "desc" },
-    { displayName: "Batting Average", valueKey: "avg", order: "desc" },
-    { displayName: "Runs Batted In", valueKey: "rbi", order: "desc" },
-    { displayName: "Hits", valueKey: "hits", order: "desc" },
-    { displayName: "Doubles", valueKey: "doubles", order: "desc" },
-    { displayName: "Triples", valueKey: "triples", order: "desc" },
-    { displayName: "Stolen Bases", valueKey: "stolenBases", order: "desc" },
-    { displayName: "On-Base Percentage", valueKey: "obp", order: "desc" },
-    { displayName: "Slugging Percentage", valueKey: "slg", order: "desc" },
-    { displayName: "OPS", valueKey: "ops", order: "desc" },
-  ];
-
-  const pitchingCategories = [
-    { displayName: "Wins", valueKey: "wins", order: "desc" },
-    { displayName: "ERA", valueKey: "era", order: "asc" },
-    { displayName: "Strikeouts", valueKey: "strikeOuts", order: "desc" },
-    { displayName: "WHIP", valueKey: "whip", order: "asc" },
-    {
-      displayName: "Innings Pitched",
-      valueKey: "inningsPitched",
-      order: "desc",
-    },
-  ];
 
   const formatForApi = (isoDate) => {
     const [y, m, d] = isoDate.split("-");
@@ -413,97 +460,27 @@ const MlbTeamComparison = () => {
             </div>
           </div>
 
-          <div>
-            <table className="w-full table-fixed divide-y divide-gray-200 bg-white shadow-md rounded-lg overflow-hidden">
-              <tbody className="bg-white divide-y divide-gray-200">
-                {hittingCategories.map((cat) => {
-                  const val1 = getValue(stats1.hitting, cat.valueKey);
-                  const val2 = getValue(stats2.hitting, cat.valueKey);
-                  const num1 = parseStat(val1);
-                  const num2 = parseStat(val2);
-                  const leads1 = isLeading(num1, num2, cat.order);
-                  const leads2 = isLeading(num2, num1, cat.order);
-                  return (
-                    <tr key={cat.valueKey}>
-                      <td className="px-6 py-4 text-base font-medium text-gray-900 w-1/3 text-center text-[24px]">
-                        {cat.displayName}
-                      </td>
-                      <td
-                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${
-                          leads1 ? "text-white" : "text-gray-500"
-                        }`}
-                        style={{
-                          background: leads1
-                            ? getGradient(team1.abbrev)
-                            : "transparent",
-                        }}
-                      >
-                        {val1}
-                      </td>
-                      <td
-                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${
-                          leads2 ? "text-white" : "text-gray-500"
-                        }`}
-                        style={{
-                          background: leads2
-                            ? getGradient(team2.abbrev)
-                            : "transparent",
-                        }}
-                      >
-                        {val2}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <StatsTable
+            categories={hittingCategories}
+            stats1={stats1.hitting}
+            stats2={stats2.hitting}
+            team1={team1}
+            team2={team2}
+            parseStat={parseStat}
+            isLeading={isLeading}
+            getValue={getValue}
+          />
 
-          <div>
-            <table className="w-full table-fixed divide-y divide-gray-200 bg-white shadow-md rounded-lg overflow-hidden">
-              <tbody className="bg-white divide-y divide-gray-200">
-                {pitchingCategories.map((cat) => {
-                  const val1 = getValue(stats1.pitching, cat.valueKey);
-                  const val2 = getValue(stats2.pitching, cat.valueKey);
-                  const num1 = parseStat(val1);
-                  const num2 = parseStat(val2);
-                  const leads1 = isLeading(num1, num2, cat.order);
-                  const leads2 = isLeading(num2, num1, cat.order);
-                  return (
-                    <tr key={cat.valueKey}>
-                      <td className="px-6 py-4 text-base font-medium text-gray-900 w-1/3 text-center text-[24px]">
-                        {cat.displayName}
-                      </td>
-                      <td
-                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${
-                          leads1 ? "text-white" : "text-gray-500"
-                        }`}
-                        style={{
-                          background: leads1
-                            ? getGradient(team1.abbrev)
-                            : "transparent",
-                        }}
-                      >
-                        {val1}
-                      </td>
-                      <td
-                        className={`text-[32px] px-6 py-4 text-base w-1/3 text-center ${
-                          leads2 ? "text-white" : "text-gray-500"
-                        }`}
-                        style={{
-                          background: leads2
-                            ? getGradient(team2.abbrev)
-                            : "transparent",
-                        }}
-                      >
-                        {val2}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <StatsTable
+            categories={pitchingCategories}
+            stats1={stats1.pitching}
+            stats2={stats2.pitching}
+            team1={team1}
+            team2={team2}
+            parseStat={parseStat}
+            isLeading={isLeading}
+            getValue={getValue}
+          />
 
           <p className="text-center text-xs text-gray-500">
             Data via MLB Stats API © MLBAM

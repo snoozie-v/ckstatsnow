@@ -68,19 +68,16 @@ export const fetchMlbPlayerStats = async ({
 };
 
 export const fetchMlbLeaders = async (params) => {
-  const {
-    group,
-    sortStat,
-    order,
-    year,
-    limit,
-    offset,
-    stats,
-    playerPool,
-    dates,
-    league,
-  } = params;
-  const url = `${MLB_STITCH_BASE_URL}/player?env=prod&sportId=1&gameType=${params.gameType}&group=${group}&sortStat=${sortStat}&order=${order}&season=${year}&limit=${limit}&offset=${offset}&stats=${stats}&playerPool=${playerPool}${dates}${league}`;
+  let datesParam = "";
+  if (params.stats === "byDateRange" && params.startDate && params.endDate) {
+    const apiStartDate = formatForApi(params.startDate);
+    const apiEndDate = formatForApi(params.endDate);
+    datesParam = `&startDate=${apiStartDate}&endDate=${apiEndDate}`;
+  }
+
+  let leagueParam = params.leagueId ? `&leagueId=${params.leagueId}` : "";
+
+  const url = `${MLB_STITCH_BASE_URL}/player?stitch_env=prod&season=${params.season}&stats=${params.stats}&group=${params.group}&gameType=${params.gameType}&limit=${params.limit}&offset=${params.offset}&sortStat=${params.sortStat}&order=${params.order}&playerPool=${params.playerPool}&sportId=1${datesParam}${leagueParam}`;
   const response = await axios.get(url);
   return response.data.stats || [];
 };

@@ -48,8 +48,7 @@ function App() {
         >
           ESPN API
         </a>
-        . © MLB Advanced Media, L.P. / ESPN Enterprises, Inc. All rights
-        reserved. | Auto-updates every 5 minutes. Non-commercial use only.
+         {" "}| Non-commercial use only.
       </footer>
     </div>
   );

@@ -1,7 +1,7 @@
 // Place this in ./components/MlbPage.jsx
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import Standings from "../MLB/Standings"; // Existing MLB-compatible component
+import MlbStandings from "../MLB/MlbStandings"; // Existing MLB-compatible component
 import MlbScores from "./MlbScores";
 import MlbLeaders from "./MlbLeaders";
 import MlbPlayerComparison from "./MlbPlayerComparison";
@@ -79,7 +79,7 @@ const MlbPage = () => {
           Team Comparison
         </button>
       </div>
-      {currentView === "standings" && <Standings league={league} />}
+      {currentView === "standings" && <MlbStandings league={league} />}
       {currentView === "scores" && <MlbScores league={league} />}
       {currentView === "leaders" && <MlbLeaders league={league} />}
       {currentView === "comparison" && <MlbPlayerComparison league={league} />}

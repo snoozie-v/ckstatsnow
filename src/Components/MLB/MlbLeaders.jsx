@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { fetchMlbLeaders } from "../../api/mlb";
-import { fetchChadwickIdMap } from "../../api/chadwick";
+import { fetchMlbLeaders, fetchMlbTeams } from "../../api/mlb";
+import { fetchChadwickIdMap } from "../../api/chadwick"; // Assuming this is correct
 
 const MlbLeaders = () => {
   const [statLeaders, setStatLeaders] = useState([]);
   const [allLeaders, setAllLeaders] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [validationError, setValidationError] = useState(null); // New: For date validation errors
   const [selectedLeague, setSelectedLeague] = useState("MLB");
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [useDateRange, setUseDateRange] = useState(false);
@@ -18,44 +19,12 @@ const MlbLeaders = () => {
   const [tempEndDate, setTempEndDate] = useState(endDate);
   const [gameType, setGameType] = useState("R");
   const [idMap, setIdMap] = useState(new Map());
+  const [teamMap, setTeamMap] = useState(new Map()); // New: Map team ID to abbrev
   const [idMapError, setIdMapError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(""); // Default to empty
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const limit = 10;
-
-  const teamAbbrevMap = new Map([
-    [108, 'LAA'],
-    [109, 'ARI'],
-    [110, 'BAL'],
-    [111, 'BOS'],
-    [112, 'CHC'],
-    [113, 'CIN'],
-    [114, 'CLE'],
-    [115, 'COL'],
-    [116, 'DET'],
-    [117, 'HOU'],
-    [118, 'KC'],
-    [119, 'LAD'],
-    [120, 'WSH'],
-    [121, 'NYM'],
-    [133, 'OAK'],
-    [134, 'PIT'],
-    [135, 'SD'],
-    [136, 'SEA'],
-    [137, 'SF'],
-    [138, 'STL'],
-    [139, 'TB'],
-    [140, 'TEX'],
-    [141, 'TOR'],
-    [142, 'MIN'],
-    [143, 'PHI'],
-    [144, 'ATL'],
-    [145, 'CWS'],
-    [146, 'MIA'],
-    [147, 'NYY'],
-    [158, 'MIL'],
-  ]);
 
   const hittingCategories = [
     {
@@ -178,32 +147,32 @@ const MlbLeaders = () => {
   const categories = [...hittingCategories, ...pitchingCategories];
 
   useEffect(() => {
-const loadIdMap = async () => {
-  const cachedMap = localStorage.getItem('chadwickIdMap');
-  if (cachedMap) {
-    try {
-      const entries = JSON.parse(cachedMap);
-      setIdMap(new Map(entries));
-      console.log("idMap loaded from cache, size:", entries.length);
-      return; // Exit early if cache hit
-    } catch (err) {
-      console.error("Failed to load cached idMap:", err);
-    }
-  }
-
-  try {
-    const map = await fetchChadwickIdMap();
-    setIdMap(map);
-    localStorage.setItem('chadwickIdMap', JSON.stringify(Array.from(map.entries())));
-    console.log("idMap loaded successfully and cached, size:", map.size);
-  } catch (err) {
-    const errorMsg = "Failed to fetch or parse ID map: " + err.message;
-    setIdMapError(errorMsg);
-    console.error(errorMsg, err);
-  }
-};
+    const loadIdMap = async () => {
+      try {
+        const map = await fetchChadwickIdMap();
+        setIdMap(map);
+        console.log("idMap loaded successfully, size:", map.size);
+      } catch (err) {
+        const errorMsg = "Failed to fetch or parse ID map: " + err.message;
+        setIdMapError(errorMsg);
+        console.error(errorMsg, err);
+      }
+    };
     loadIdMap();
   }, []);
+
+  useEffect(() => {
+    const loadTeamMap = async () => {
+      try {
+        const teams = await fetchMlbTeams(year);
+        const map = new Map(teams.map((t) => [t.id, t.abbreviation]));
+        setTeamMap(map);
+      } catch (err) {
+        console.error("Failed to load team map:", err);
+      }
+    };
+    loadTeamMap();
+  }, [year]);
 
   const fetchLeaders = async () => {
     setLoading(true);
@@ -212,44 +181,35 @@ const loadIdMap = async () => {
       return;
     }
     setError(null);
+    const leagueFilter = selectedLeague === "MLB" ? "qualified" : selectedLeague; // Standardized for qualified leaders
+    const statType = useDateRange ? "byDateRange" : "season";
+    const season = useDateRange ? undefined : year;
+
     try {
-      let leagueId = "";
-      if (selectedLeague === "AL") {
-        leagueId = "103";
-      } else if (selectedLeague === "NL") {
-        leagueId = "104";
-      } else {
-        leagueId = "103,104";
-      }
-
-      let stats = "season";
-      let playerPool = gameType === "R" && !useDateRange ? "qualified" : "all";
-      if (useDateRange) {
-        stats = "byDateRange";
-      }
-
       if (selectedCategory === "all") {
         const fetches = categories.map(async (cat) => {
           const players = await fetchMlbLeaders({
+            playerPool: leagueFilter,
+            useDateRange,
             gameType,
             group: cat.group,
             sortStat: cat.sortStat,
             order: cat.order,
-            season: year,
+            season,
+            statType,
             limit,
             offset: 0,
-            stats,
-            playerPool,
-            startDate: useDateRange ? startDate : undefined,
-            endDate: useDateRange ? endDate : undefined,
-            leagueId,
+            startDate,
+            endDate,
           });
-          const newLeaders = players.map((player) => ({
-            name: player.playerFullName,
-            team: player.teamAbbrev,
-            value: player[cat.valueKey],
-            playerId: player.playerId,
-          }));
+          const newLeaders = players
+            .map((player) => ({
+              name: player.player?.fullName || "Unknown",
+              team: player.team?.id ? teamMap.get(player.team.id) : "-",
+              value: player.stat?.[cat.valueKey],
+              playerId: player.player?.id,
+            }))
+            .filter((p) => p.value !== null && p.value !== undefined);
           return { sortStat: cat.sortStat, leaders: newLeaders };
         });
         const results = await Promise.all(fetches);
@@ -266,25 +226,27 @@ const loadIdMap = async () => {
           throw new Error("Selected category not found");
         }
         const players = await fetchMlbLeaders({
+          playerPool: leagueFilter,
+          useDateRange,
           gameType,
           group: cat.group,
           sortStat: cat.sortStat,
           order: cat.order,
-          season: year,
+          season,
+          statType,
           limit,
           offset,
-          stats,
-          playerPool,
-          startDate: useDateRange ? startDate : undefined,
-          endDate: useDateRange ? endDate : undefined,
-          leagueId,
+          startDate,
+          endDate,
         });
-        const newLeaders = players.map((player) => ({
-          name: player.playerFullName,
-          team: player.teamAbbrev,
-          value: player[cat.valueKey],
-          playerId: player.playerId,
-        }));
+        const newLeaders = players
+          .map((player) => ({
+            name: player.player?.fullName || "Unknown",
+            team: player.team?.id ? teamMap.get(player.team.id) : "-",
+            value: player.stat?.[cat.valueKey],
+            playerId: player.player?.id,
+          }))
+          .filter((p) => p.value !== null && p.value !== undefined);
         setStatLeaders((prev) =>
           offset === 0 ? newLeaders : [...prev, ...newLeaders]
         );
@@ -304,7 +266,7 @@ const loadIdMap = async () => {
     setStatLeaders([]);
     setAllLeaders({});
     setHasMore(true);
-    
+
     fetchLeaders();
     const interval = setInterval(fetchLeaders, 300000);
     return () => clearInterval(interval);
@@ -337,6 +299,15 @@ const loadIdMap = async () => {
   }, [useDateRange, startDate, endDate]);
 
   const applyDateRange = () => {
+    setValidationError(null);
+    if (new Date(tempStartDate) > new Date(tempEndDate)) {
+      setValidationError("Start date must be before or equal to end date.");
+      return;
+    }
+    if (!tempStartDate || !tempEndDate) {
+      setValidationError("Please select valid start and end dates.");
+      return;
+    }
     setStartDate(tempStartDate);
     setEndDate(tempEndDate);
   };
@@ -450,6 +421,9 @@ const loadIdMap = async () => {
     <div>
       {idMapError && (
         <p className="text-center text-red-600 mb-4">{idMapError}</p>
+      )}
+      {validationError && (
+        <p className="text-center text-red-600 mb-4">{validationError}</p>
       )}
       <div className="mb-4 flex items-center justify-center">
         <label htmlFor="yearFilter" className="mr-2 text-lg font-medium">

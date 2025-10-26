@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { teamColors, getGradient } from "../MLB/mlbUtils";
+import { getGradient } from "../MLB/mlbUtils";
 import {
   fetchMlbTeams,
   searchMlbPlayers,
@@ -45,11 +45,6 @@ const isLeading = (myNum, oppNum, order) => {
   } else {
     return myNum < oppNum;
   }
-};
-
-const formatForApi = (isoDate) => {
-  const [y, m, d] = isoDate.split("-");
-  return `${m.padStart(2, "0")}/${d.padStart(2, "0")}/${y}`;
 };
 
 const formatForDisplay = (isoDate) => {
@@ -206,6 +201,7 @@ const MlbPlayerComparison = () => {
   const [stats2, setStats2] = useState({ hitting: {}, pitching: {} });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [validationError, setValidationError] = useState(null); // New: For date validation
   const [gameType, setGameType] = useState("R");
   const [selectedLeague, setSelectedLeague] = useState("MLB");
 
@@ -219,6 +215,7 @@ const MlbPlayerComparison = () => {
       setAllTeams(teamsMap);
     } catch (err) {
       console.error("Failed to fetch teams:", err);
+      setError("Failed to fetch teams");
     }
   };
 
@@ -376,6 +373,15 @@ const MlbPlayerComparison = () => {
   }, [useDateRange, startDate, endDate]);
 
   const applyDateRange = () => {
+    setValidationError(null);
+    if (new Date(tempStartDate) > new Date(tempEndDate)) {
+      setValidationError("Start date must be before or equal to end date.");
+      return;
+    }
+    if (!tempStartDate || !tempEndDate) {
+      setValidationError("Please select valid start and end dates.");
+      return;
+    }
     setStartDate(tempStartDate);
     setEndDate(tempEndDate);
   };
@@ -386,6 +392,9 @@ const MlbPlayerComparison = () => {
 
   return (
     <div className="space-y-6">
+      {validationError && (
+        <p className="text-center text-red-600">{validationError}</p>
+      )}
       <div className="flex justify-between items-center">
         <div className="text-lg font-bold text-blue-900">Player Comparison</div>
         <div className="flex space-x-4 text-sm">

@@ -42,21 +42,27 @@ export const fetchMlbPlayerStats = async ({
   endDate,
   selectedLeague,
 }) => {
-  let statsParam = "season";
-  let dateParams = "";
+  const url = new URL(`${MLB_STATS_BASE_URL}/people/${playerId}/stats`);
+  const params = {
+    stats: useDateRange ? "byDateRange" : "season",
+    gameType,
+    sportId: 1,
+  };
+
   if (useDateRange) {
-    statsParam = "byDateRange";
-    dateParams = `&startDate=${formatForApi(startDate)}&endDate=${formatForApi(
-      endDate
-    )}`;
+    params.startDate = formatForApi(startDate);
+    params.endDate = formatForApi(endDate);
+  } else {
+    params.season = year;
   }
-  let leagueParam =
-    selectedLeague === "AL"
-      ? "&leagueIds=103"
-      : selectedLeague === "NL"
-      ? "&leagueIds=104"
-      : "";
-  const baseUrl = `${MLB_STATS_BASE_URL}/people/${playerId}/stats?stats=${statsParam}&gameType=${gameType}&season=${year}${dateParams}${leagueParam}`;
+
+  if (selectedLeague === "AL") {
+    params.leagueId = 103;
+  } else if (selectedLeague === "NL") {
+    params.leagueId = 104;
+  }
+
+  const baseUrl = `${url.toString()}?${new URLSearchParams(params).toString()}`;
   const [hittingRes, pitchingRes] = await Promise.all([
     axios.get(`${baseUrl}&group=hitting`),
     axios.get(`${baseUrl}&group=pitching`),
@@ -67,19 +73,55 @@ export const fetchMlbPlayerStats = async ({
   };
 };
 
-export const fetchMlbLeaders = async (params) => {
-  let datesParam = "";
-  if (params.stats === "byDateRange" && params.startDate && params.endDate) {
-    const apiStartDate = formatForApi(params.startDate);
-    const apiEndDate = formatForApi(params.endDate);
-    datesParam = `&startDate=${apiStartDate}&endDate=${apiEndDate}`;
+export const fetchMlbLeaders = async ({
+  statType, // 'season' or 'byDateRange'
+  group,
+  sortStat,
+  order,
+  season,
+  limit,
+  offset,
+  gameType,
+  playerPool, // Now used as league filter ('qualified' for MLB, 'AL', 'NL')
+  useDateRange,
+  startDate,
+  endDate,
+}) => {
+  const url = new URL("https://statsapi.mlb.com/api/v1/stats");
+  const params = {
+    stats: statType,
+    group,
+    sortStat,
+    order,
+    limit,
+    offset,
+    gameType,
+    sportId: 1,
+    playerPool: 'qualified', // Standardize to qualified for proper leaders
+  };
+
+  // League filtering
+  if (playerPool === "AL") {
+    params.leagueId = 103;
+  } else if (playerPool === "NL") {
+    params.leagueId = 104;
   }
 
-  let leagueParam = params.leagueId ? `&leagueId=${params.leagueId}` : "";
+  if (useDateRange) {
+    params.startDate = formatForApi(startDate);
+    params.endDate = formatForApi(endDate);
+  } else {
+    params.season = season;
+  }
 
-  const url = `${MLB_STITCH_BASE_URL}/player?stitch_env=prod&season=${params.season}&stats=${params.stats}&group=${params.group}&gameType=${params.gameType}&limit=${params.limit}&offset=${params.offset}&sortStat=${params.sortStat}&order=${params.order}&playerPool=${params.playerPool}&sportId=1${datesParam}${leagueParam}`;
-  const response = await axios.get(url);
-  return response.data.stats || [];
+  Object.keys(params).forEach((key) => {
+    if (params[key] !== undefined) {
+      url.searchParams.append(key, params[key]);
+    }
+  });
+
+  const response = await axios.get(url.toString());
+  return response.data?.stats?.[0]?.splits || [];
 };
 
 export const fetchMlbPlayoffData = async (year) => {
@@ -97,21 +139,27 @@ export const fetchMlbTeamStats = async ({
   endDate,
   selectedLeague,
 }) => {
-  let statsParam = "season";
-  let dateParams = "";
+  const url = new URL(`${MLB_STATS_BASE_URL}/teams/${teamId}/stats`);
+  const params = {
+    stats: useDateRange ? "byDateRange" : "season",
+    gameType,
+    sportId: 1,
+  };
+
   if (useDateRange) {
-    statsParam = "byDateRange";
-    dateParams = `&startDate=${formatForApi(startDate)}&endDate=${formatForApi(
-      endDate
-    )}`;
+    params.startDate = formatForApi(startDate);
+    params.endDate = formatForApi(endDate);
+  } else {
+    params.season = year;
   }
-  let leagueParam =
-    selectedLeague === "AL"
-      ? "&leagueIds=103"
-      : selectedLeague === "NL"
-      ? "&leagueIds=104"
-      : "";
-  const baseUrl = `${MLB_STATS_BASE_URL}/teams/${teamId}/stats?stats=${statsParam}&gameType=${gameType}&season=${year}${dateParams}${leagueParam}`;
+
+  if (selectedLeague === "AL") {
+    params.leagueId = 103;
+  } else if (selectedLeague === "NL") {
+    params.leagueId = 104;
+  }
+
+  const baseUrl = `${url.toString()}?${new URLSearchParams(params).toString()}`;
   const [hittingRes, pitchingRes] = await Promise.all([
     axios.get(`${baseUrl}&group=hitting`),
     axios.get(`${baseUrl}&group=pitching`),

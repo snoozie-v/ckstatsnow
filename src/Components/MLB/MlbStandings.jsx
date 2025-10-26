@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { getGradient } from "../MLB/mlbUtils";
-import PlayoffMatchups from "./PlayoffMatchups";
+import { getGradient } from "./mlbUtils";
+import PlayoffMatchups from "./MlbPlayoffMatchups";
 
-const Standings = ({ league }) => {
+const MlbStandings = ({ league }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -225,4 +225,4 @@ const Standings = ({ league }) => {
   );
 };
 
-export default Standings;
+export default MlbStandings;

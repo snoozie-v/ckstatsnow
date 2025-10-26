@@ -197,6 +197,7 @@ const MlbPlayerComparison = () => {
   const [endDate, setEndDate] = useState(`${new Date().getFullYear()}-10-01`);
   const [tempStartDate, setTempStartDate] = useState(startDate);
   const [tempEndDate, setTempEndDate] = useState(endDate);
+  const [preset, setPreset] = useState("custom");
   const [stats1, setStats1] = useState({ hitting: {}, pitching: {} });
   const [stats2, setStats2] = useState({ hitting: {}, pitching: {} });
   const [loading, setLoading] = useState(false);
@@ -386,6 +387,47 @@ const MlbPlayerComparison = () => {
     setEndDate(tempEndDate);
   };
 
+  const handlePresetChange = (event) => {
+    const value = event.target.value;
+    setPreset(value);
+
+    if (value === "custom") {
+      return;
+    }
+
+    const now = new Date();
+    const getDateStr = (d) => d.toISOString().split("T")[0];
+    let s, e;
+
+    if (value === "today") {
+      s = getDateStr(now);
+      e = s;
+    } else if (value === "yesterday") {
+      const yest = new Date(now);
+      yest.setDate(yest.getDate() - 1);
+      s = getDateStr(yest);
+      e = s;
+    } else if (value === "thisWeek") {
+      const start = new Date(now);
+      start.setDate(start.getDate() - now.getDay());
+      s = getDateStr(start);
+      e = getDateStr(now);
+    } else if (value === "lastWeek") {
+      const startThis = new Date(now);
+      startThis.setDate(startThis.getDate() - now.getDay());
+      const endLast = new Date(startThis);
+      endLast.setDate(endLast.getDate() - 1);
+      const startLast = new Date(endLast);
+      startLast.setDate(startLast.getDate() - 6);
+      s = getDateStr(startLast);
+      e = getDateStr(endLast);
+    }
+
+    setTempStartDate(s);
+    setTempEndDate(e);
+    applyDateRange(); // Automatically apply for presets
+  };
+
   const displayPeriod = `${formatForDisplay(startDate)} to ${formatForDisplay(
     endDate
   )}`;
@@ -467,34 +509,59 @@ const MlbPlayerComparison = () => {
         />
       </div>
       {useDateRange && (
-        <div className="flex justify-center space-x-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Start Date:
+        <>
+          <div className="mb-4 flex items-center justify-center">
+            <label htmlFor="presetFilter" className="mr-2 text-lg font-medium">
+              Quick Filter:
             </label>
-            <input
-              type="date"
-              value={tempStartDate}
-              onChange={(e) => setTempStartDate(e.target.value)}
-              className="p-1 border rounded"
-            />
+            <select
+              id="presetFilter"
+              value={preset}
+              onChange={handlePresetChange}
+              className="p-2 border border-gray-300 rounded-md"
+            >
+              <option value="custom">Custom</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="thisWeek">This Week</option>
+              <option value="lastWeek">Last Week</option>
+            </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">End Date:</label>
-            <input
-              type="date"
-              value={tempEndDate}
-              onChange={(e) => setTempEndDate(e.target.value)}
-              className="p-1 border rounded"
-            />
+          <div className="flex justify-center space-x-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Start Date:
+              </label>
+              <input
+                type="date"
+                value={tempStartDate}
+                onChange={(e) => {
+                  setTempStartDate(e.target.value);
+                  setPreset("custom");
+                }}
+                className="p-1 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">End Date:</label>
+              <input
+                type="date"
+                value={tempEndDate}
+                onChange={(e) => {
+                  setTempEndDate(e.target.value);
+                  setPreset("custom");
+                }}
+                className="p-1 border rounded"
+              />
+            </div>
+            <button
+              onClick={applyDateRange}
+              className="p-1 bg-blue-500 text-white rounded mt-6"
+            >
+              Apply
+            </button>
           </div>
-          <button
-            onClick={applyDateRange}
-            className="p-1 bg-blue-500 text-white rounded mt-6"
-          >
-            Apply
-          </button>
-        </div>
+        </>
       )}
 
       {loading && (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchMlbLeaders, fetchMlbTeams } from "../../api/mlb";
-import { fetchChadwickIdMap } from "../../api/chadwick"; // Assuming this is correct
+import { fetchChadwickPlayerId } from "../../api/chadwick";
 
 const MlbLeaders = () => {
   const [statLeaders, setStatLeaders] = useState([]);
@@ -18,12 +18,11 @@ const MlbLeaders = () => {
   const [tempStartDate, setTempStartDate] = useState(startDate);
   const [tempEndDate, setTempEndDate] = useState(endDate);
   const [gameType, setGameType] = useState("R");
-  const [idMap, setIdMap] = useState(new Map());
   const [teamMap, setTeamMap] = useState(new Map()); // New: Map team ID to abbrev
-  const [idMapError, setIdMapError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(""); // Default to empty
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [preset, setPreset] = useState("custom");
   const limit = 10;
 
   const hittingCategories = [
@@ -147,21 +146,6 @@ const MlbLeaders = () => {
   const categories = [...hittingCategories, ...pitchingCategories];
 
   useEffect(() => {
-    const loadIdMap = async () => {
-      try {
-        const map = await fetchChadwickIdMap();
-        setIdMap(map);
-        console.log("idMap loaded successfully, size:", map.size);
-      } catch (err) {
-        const errorMsg = "Failed to fetch or parse ID map: " + err.message;
-        setIdMapError(errorMsg);
-        console.error(errorMsg, err);
-      }
-    };
-    loadIdMap();
-  }, []);
-
-  useEffect(() => {
     const loadTeamMap = async () => {
       try {
         const teams = await fetchMlbTeams(year);
@@ -174,6 +158,21 @@ const MlbLeaders = () => {
     loadTeamMap();
   }, [year]);
 
+  const handlePlayerClick = async (playerId) => {
+    if (!playerId) return;
+    try {
+      const chadwickId = await fetchChadwickPlayerId(playerId);
+      if (chadwickId) {
+        const url = `https://www.baseball-reference.com/players/${chadwickId.charAt(
+          0
+        )}/${chadwickId}.shtml`;
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+    } catch (err) {
+      console.error("Failed to fetch Chadwick ID:", err);
+    }
+  };
+
   const fetchLeaders = async () => {
     setLoading(true);
     if (!selectedCategory) {
@@ -181,7 +180,8 @@ const MlbLeaders = () => {
       return;
     }
     setError(null);
-    const leagueFilter = selectedLeague === "MLB" ? "qualified" : selectedLeague; // Standardized for qualified leaders
+    const leagueFilter =
+      selectedLeague === "MLB" ? "qualified" : selectedLeague; // Standardized for qualified leaders
     const statType = useDateRange ? "byDateRange" : "season";
     const season = useDateRange ? undefined : year;
 
@@ -312,6 +312,47 @@ const MlbLeaders = () => {
     setEndDate(tempEndDate);
   };
 
+  const handlePresetChange = (event) => {
+    const value = event.target.value;
+    setPreset(value);
+
+    if (value === "custom") {
+      return;
+    }
+
+    const now = new Date();
+    const getDateStr = (d) => d.toISOString().split("T")[0];
+    let s, e;
+
+    if (value === "today") {
+      s = getDateStr(now);
+      e = s;
+    } else if (value === "yesterday") {
+      const yest = new Date(now);
+      yest.setDate(yest.getDate() - 1);
+      s = getDateStr(yest);
+      e = s;
+    } else if (value === "thisWeek") {
+      const start = new Date(now);
+      start.setDate(start.getDate() - now.getDay());
+      s = getDateStr(start);
+      e = getDateStr(now);
+    } else if (value === "lastWeek") {
+      const startThis = new Date(now);
+      startThis.setDate(startThis.getDate() - now.getDay());
+      const endLast = new Date(startThis);
+      endLast.setDate(endLast.getDate() - 1);
+      const startLast = new Date(endLast);
+      startLast.setDate(startLast.getDate() - 6);
+      s = getDateStr(startLast);
+      e = getDateStr(endLast);
+    }
+
+    setTempStartDate(s);
+    setTempEndDate(e);
+    applyDateRange(); // Automatically apply for presets
+  };
+
   const loadMore = () => {
     setOffset((prev) => prev + limit);
   };
@@ -346,26 +387,13 @@ const MlbLeaders = () => {
                 </thead>
                 <tbody>
                   {leaders.map((leader, idx) => {
-                    const hasMapping =
-                      leader.playerId && idMap.has(leader.playerId);
-                    if (!hasMapping && leader.playerId) {
-                      console.log(
-                        `No mapping found for player: ${leader.name} (ID: ${leader.playerId})`
-                      );
-                    }
                     return (
                       <tr key={idx}>
                         <td className="px-2 py-4 whitespace-nowrap md:px-6">
                           {idx + 1 + idxOffset}
                         </td>
                         <td className="px-2 py-4 md:px-6">
-                          {leader.team && (
-                            <img
-                              src={`https://a.espncdn.com/i/teamlogos/mlb/500/${leader.team.toLowerCase()}.png`}
-                              alt={`${leader.team} logo`}
-                              className="w-6 h-6 object-contain md:w-8 md:h-8"
-                            />
-                          )}
+                          {/* Team logo can be added here if desired */}
                         </td>
                         <td className="px-2 py-4 md:px-6">
                           <div className="flex items-center">
@@ -376,22 +404,18 @@ const MlbLeaders = () => {
                                 className="w-8 h-8 rounded-full mr-2 object-cover"
                               />
                             )}
-                            {hasMapping ? (
-                              <a
-                                href={`https://www.baseball-reference.com/players/${idMap
-                                  .get(leader.playerId)
-                                  .charAt(0)}/${idMap.get(
-                                  leader.playerId
-                                )}.shtml`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
-                              >
-                                {leader.name || "Unknown"}
-                              </a>
-                            ) : (
-                              leader.name || "Unknown"
-                            )}
+                            <button
+                              onClick={() => handlePlayerClick(leader.playerId)}
+                              className="text-blue-600 hover:underline text-left"
+                              disabled={!leader.playerId}
+                              title={
+                                leader.playerId
+                                  ? "View on Baseball-Reference"
+                                  : "Player ID not available"
+                              }
+                            >
+                              {leader.name || "Unknown"}
+                            </button>
                           </div>
                         </td>
                         <td className="px-2 py-4 md:px-6">
@@ -419,9 +443,6 @@ const MlbLeaders = () => {
 
   return (
     <div>
-      {idMapError && (
-        <p className="text-center text-red-600 mb-4">{idMapError}</p>
-      )}
       {validationError && (
         <p className="text-center text-red-600 mb-4">{validationError}</p>
       )}
@@ -501,34 +522,61 @@ const MlbLeaders = () => {
         />
       </div>
       {useDateRange && (
-        <div className="flex justify-center space-x-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Start Date:
+        <>
+          <div className="mb-4 flex items-center justify-center">
+            <label htmlFor="presetFilter" className="mr-2 text-lg font-medium">
+              Quick Filter:
             </label>
-            <input
-              type="date"
-              value={tempStartDate}
-              onChange={(e) => setTempStartDate(e.target.value)}
-              className="p-2 border rounded"
-            />
+            <select
+              id="presetFilter"
+              value={preset}
+              onChange={handlePresetChange}
+              className="p-2 border border-gray-300 rounded-md"
+            >
+              <option value="custom">Custom</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="thisWeek">This Week</option>
+              <option value="lastWeek">Last Week</option>
+            </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">End Date:</label>
-            <input
-              type="date"
-              value={tempEndDate}
-              onChange={(e) => setTempEndDate(e.target.value)}
-              className="p-2 border rounded"
-            />
+          <div className="flex justify-center space-x-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Start Date:
+              </label>
+              <input
+                type="date"
+                value={tempStartDate}
+                onChange={(e) => {
+                  setTempStartDate(e.target.value);
+                  setPreset("custom");
+                }}
+                className="p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                End Date:
+              </label>
+              <input
+                type="date"
+                value={tempEndDate}
+                onChange={(e) => {
+                  setTempEndDate(e.target.value);
+                  setPreset("custom");
+                }}
+                className="p-2 border rounded"
+              />
+            </div>
+            <button
+              onClick={applyDateRange}
+              className="p-2 bg-blue-500 text-white rounded mt-6"
+            >
+              Apply
+            </button>
           </div>
-          <button
-            onClick={applyDateRange}
-            className="p-2 bg-blue-500 text-white rounded mt-6"
-          >
-            Apply
-          </button>
-        </div>
+        </>
       )}
       {!selectedCategory ? (
         <p className="text-center text-gray-600">

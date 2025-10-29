@@ -141,7 +141,7 @@ const StatsTable = ({ categories, stats1, stats2, player1, player2 }) => {
               className={`transition duration-150 ease-in-out ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-indigo-50`}
             >
               <td
-                className={`px-6 py-4 text-lg font-medium text-gray-900 text-center ${
+                className={`px-3 py-2 text-lg font-medium text-gray-900 text-center ${
                   player1.id && player2.id ? "w-1/3" : "w-1/2"
                 }`}
               >
@@ -149,7 +149,7 @@ const StatsTable = ({ categories, stats1, stats2, player1, player2 }) => {
               </td>
               {player1.id && (
                 <td
-                  className={`text-2xl px-6 py-4 font-semibold text-center ${
+                  className={`text-2xl px-3 py-2 font-semibold text-center ${
                     player1.id && player2.id ? "w-1/3" : "w-1/2"
                   } ${leads1 ? "text-white" : "text-gray-600"}`}
                   style={{
@@ -164,7 +164,7 @@ const StatsTable = ({ categories, stats1, stats2, player1, player2 }) => {
               )}
               {player2.id && (
                 <td
-                  className={`text-2xl px-6 py-4 font-semibold w-1/3 text-center ${
+                  className={`text-2xl px-3 py-2 font-semibold w-1/3 text-center ${
                     leads2 ? "text-white" : "text-gray-600"
                   }`}
                   style={{

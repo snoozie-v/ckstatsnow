@@ -33,40 +33,57 @@ const StatsTable = ({
   isLeading,
   getValue,
 }) => (
-  <table className="w-full table-fixed divide-y divide-gray-200 bg-white shadow-md rounded-lg overflow-hidden">
-    <tbody className="bg-white divide-y divide-gray-200">
-      {categories.map((cat) => {
+  <table className="w-full table-fixed bg-white shadow-lg rounded-xl overflow-hidden border-collapse">
+    <tbody className="divide-y divide-gray-200">
+      {categories.map((cat, index) => {
         const val1 = getValue(stats1, cat.valueKey);
-        const val2 = getValue(stats2, cat.valueKey);
+        const val2 = team2?.id ? getValue(stats2, cat.valueKey) : null;
         const num1 = parseStat(val1);
         const num2 = parseStat(val2);
         const leads1 = isLeading(num1, num2, cat.order);
         const leads2 = isLeading(num2, num1, cat.order);
         return (
-          <tr key={cat.valueKey}>
-            <td className="px-4 py-2 text-lg font-medium text-gray-900 w-1/3 text-center">
+          <tr
+            key={cat.valueKey}
+            className={`transition duration-150 ease-in-out ${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-indigo-50`}
+          >
+            <td
+              className={`px-6 py-4 text-lg font-medium text-gray-900 text-center ${
+                team1.id && team2.id ? "w-1/3" : "w-1/2"
+              }`}
+            >
               {cat.displayName}
             </td>
-            <td
-              className={`text-2xl px-4 py-2 font-semibold w-1/3 text-center ${
-                leads1 ? "text-white" : "text-gray-500"
-              }`}
-              style={{
-                background: leads1 ? getGradient(team1.abbrev) : "transparent",
-              }}
-            >
-              {val1}
-            </td>
-            <td
-              className={`text-2xl px-4 py-2 font-semibold w-1/3 text-center ${
-                leads2 ? "text-white" : "text-gray-500"
-              }`}
-              style={{
-                background: leads2 ? getGradient(team2.abbrev) : "transparent",
-              }}
-            >
-              {val2}
-            </td>
+            {team1.id && (
+              <td
+                className={`text-2xl px-6 py-4 font-semibold text-center ${
+                  team1.id && team2.id ? "w-1/3" : "w-1/2"
+                } ${leads1 ? "text-white" : "text-gray-600"}`}
+                style={{
+                  background:
+                    leads1 && team1?.abbrev
+                      ? getGradient(team1.abbrev)
+                      : "transparent",
+                }}
+              >
+                {val1}
+              </td>
+            )}
+            {team2.id && (
+              <td
+                className={`text-2xl px-6 py-4 font-semibold w-1/3 text-center ${
+                  leads2 ? "text-white" : "text-gray-600"
+                }`}
+                style={{
+                  background:
+                    leads2 && team2?.abbrev
+                      ? getGradient(team2.abbrev)
+                      : "transparent",
+                }}
+              >
+                {val2}
+              </td>
+            )}
           </tr>
         );
       })}
@@ -98,6 +115,7 @@ const MlbTeamComparison = () => {
   const [validationError, setValidationError] = useState(null); // New: For date validation
   const [gameType, setGameType] = useState("R");
   const [selectedLeague, setSelectedLeague] = useState("MLB");
+  const [hittingFirst, setHittingFirst] = useState(true); // New state for toggle
 
   const formatForDisplay = (isoDate) => {
     const [y, m, d] = isoDate.split("-");
@@ -313,43 +331,47 @@ const MlbTeamComparison = () => {
   };
 
   const getValue = (groupData, key) => {
-    return groupData[key] ?? "-";
+    return groupData?.[key] ?? "-";
   };
 
   const displayPeriod = `${formatForDisplay(startDate)} to ${formatForDisplay(
     endDate
   )}`;
 
+  const toggleOrder = () => {
+    setHittingFirst(!hittingFirst);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-4xl mx-auto p-6 bg-gray-50 rounded-2xl shadow-xl">
       {validationError && (
-        <p className="text-center text-red-600">{validationError}</p>
+        <p className="text-center text-red-600 font-medium">{validationError}</p>
       )}
       <div className="flex justify-between items-center">
-        <div className="text-lg font-bold text-blue-900">Team Comparison</div>
-        <div className="flex space-x-4 text-sm">
+        <h2 className="text-2xl font-bold tracking-tight text-indigo-900">Team Comparison</h2>
+        <div className="flex space-x-4 text-sm text-gray-600">
           <span>Year: {year}</span>
           {useDateRange && <span>Period: {displayPeriod}</span>}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium mb-1">Team 1:</label>
+          <label className="block text-sm font-semibold mb-2 text-gray-800">Team 1:</label>
           <input
             type="text"
             value={search1}
             onChange={(e) => setSearch1(e.target.value)}
             placeholder="Search for a team..."
-            className="w-full p-2 border rounded mb-1"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
           />
           {suggestions1.length > 0 && (
-            <ul className="border mt-1 max-h-40 overflow-y-auto bg-white rounded">
+            <ul className="mt-2 bg-white border border-gray-200 rounded-lg shadow-md max-h-40 overflow-y-auto">
               {suggestions1.map((team) => (
                 <li
                   key={team.id}
                   onClick={() => selectTeam1(team)}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  className="p-3 hover:bg-indigo-50 cursor-pointer transition duration-150 text-gray-800"
                 >
                   {team.name} ({team.abbreviation})
                 </li>
@@ -361,7 +383,7 @@ const MlbTeamComparison = () => {
               Selected: {team1.name} ({team1.abbrev})
               <button
                 onClick={clearTeam1}
-                className="ml-2 text-blue-500 hover:text-blue-700 text-xs"
+                className="ml-2 text-indigo-600 hover:text-indigo-800 text-xs font-medium"
               >
                 Clear
               </button>
@@ -370,21 +392,21 @@ const MlbTeamComparison = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Team 2:</label>
+          <label className="block text-sm font-semibold mb-2 text-gray-800">Team 2:</label>
           <input
             type="text"
             value={search2}
             onChange={(e) => setSearch2(e.target.value)}
             placeholder="Search for a team..."
-            className="w-full p-2 border rounded mb-1"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
           />
           {suggestions2.length > 0 && (
-            <ul className="border mt-1 max-h-40 overflow-y-auto bg-white rounded">
+            <ul className="mt-2 bg-white border border-gray-200 rounded-lg shadow-md max-h-40 overflow-y-auto">
               {suggestions2.map((team) => (
                 <li
                   key={team.id}
                   onClick={() => selectTeam2(team)}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  className="p-3 hover:bg-indigo-50 cursor-pointer transition duration-150 text-gray-800"
                 >
                   {team.name} ({team.abbreviation})
                 </li>
@@ -396,7 +418,7 @@ const MlbTeamComparison = () => {
               Selected: {team2.name} ({team2.abbrev})
               <button
                 onClick={clearTeam2}
-                className="ml-2 text-blue-500 hover:text-blue-700 text-xs"
+                className="ml-2 text-indigo-600 hover:text-indigo-800 text-xs font-medium"
               >
                 Clear
               </button>
@@ -405,12 +427,12 @@ const MlbTeamComparison = () => {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center space-x-4">
-        <label className="whitespace-nowrap">Year: </label>
+      <div className="flex flex-wrap items-center space-x-4 text-sm">
+        <label className="whitespace-nowrap font-medium text-gray-800">Year: </label>
         <select
           value={year}
           onChange={(e) => setYear(e.target.value)}
-          className="p-1 border rounded"
+          className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
         >
           {[2023, 2024, 2025].map((y) => (
             <option key={y} value={y.toString()}>
@@ -418,20 +440,20 @@ const MlbTeamComparison = () => {
             </option>
           ))}
         </select>
-        <label className="whitespace-nowrap">Game Type: </label>
+        <label className="whitespace-nowrap font-medium text-gray-800">Game Type: </label>
         <select
           value={gameType}
           onChange={(e) => setGameType(e.target.value)}
-          className="p-1 border rounded"
+          className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
         >
           <option value="R">Regular Season</option>
           <option value="P">Postseason</option>
         </select>
-        <label className="whitespace-nowrap">League: </label>
+        <label className="whitespace-nowrap font-medium text-gray-800">League: </label>
         <select
           value={selectedLeague}
           onChange={(e) => setSelectedLeague(e.target.value)}
-          className="p-1 border rounded"
+          className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
         >
           <option value="MLB">MLB</option>
           <option value="AL">AL</option>
@@ -439,25 +461,26 @@ const MlbTeamComparison = () => {
         </select>
       </div>
 
-      <div className="mb-4 flex items-center justify-center">
-        <label className="mr-2">Use Custom Date Range:</label>
+      <div className="flex items-center justify-center space-x-2">
+        <label className="text-sm font-medium text-gray-800">Use Custom Date Range:</label>
         <input
           type="checkbox"
           checked={useDateRange}
           onChange={(e) => setUseDateRange(e.target.checked)}
+          className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
         />
       </div>
       {useDateRange && (
         <>
-          <div className="mb-4 flex items-center justify-center">
-            <label htmlFor="presetFilter" className="mr-2 text-lg font-medium">
+          <div className="flex items-center justify-center space-x-4">
+            <label htmlFor="presetFilter" className="text-sm font-medium text-gray-800">
               Quick Filter:
             </label>
             <select
               id="presetFilter"
               value={preset}
               onChange={handlePresetChange}
-              className="p-2 border border-gray-300 rounded-md"
+              className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
             >
               <option value="custom">Custom</option>
               <option value="today">Today</option>
@@ -466,9 +489,9 @@ const MlbTeamComparison = () => {
               <option value="lastWeek">Last Week</option>
             </select>
           </div>
-          <div className="flex justify-center space-x-4 mb-4">
+          <div className="flex justify-center space-x-4 mt-4">
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 text-gray-800">
                 Start Date:
               </label>
               <input
@@ -478,11 +501,13 @@ const MlbTeamComparison = () => {
                   setTempStartDate(e.target.value);
                   setPreset("custom");
                 }}
-                className="p-1 border rounded"
+                className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">End Date:</label>
+              <label className="block text-sm font-medium mb-1 text-gray-800">
+                End Date:
+              </label>
               <input
                 type="date"
                 value={tempEndDate}
@@ -490,12 +515,12 @@ const MlbTeamComparison = () => {
                   setTempEndDate(e.target.value);
                   setPreset("custom");
                 }}
-                className="p-1 border rounded"
+                className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
               />
             </div>
             <button
               onClick={applyDateRange}
-              className="p-1 bg-blue-500 text-white rounded mt-6"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg mt-6 hover:bg-indigo-700 transition duration-150 ease-in-out hover:scale-105"
             >
               Apply
             </button>
@@ -504,67 +529,129 @@ const MlbTeamComparison = () => {
       )}
 
       {loading && (
-        <p className="text-center text-gray-600">Loading comparison...</p>
+        <p className="text-center text-gray-600 font-medium">Loading comparison...</p>
       )}
-      {error && <p className="text-center text-red-600">{error}</p>}
+      {error && <p className="text-center text-red-600 font-medium">{error}</p>}
 
-      {team1.id && team2.id ? (
-        <div className="border-4 border-sky-800">
-          <div className="grid grid-cols-3">
-            <div className="bg-sky-800 text-white py-4 px-6 flex items-center justify-center">
-              ckstats
+      {team1.id || team2.id ? (
+        <div className="border-2 border-indigo-200 rounded-2xl overflow-hidden shadow-2xl bg-white">
+          <div
+            className={`grid ${
+              team1.id && team2.id ? "grid-cols-3" : "grid-cols-2"
+            } bg-indigo-800 text-white font-bold`}
+          >
+            <div className="py-4 px-6 flex items-center justify-center text-lg tracking-wide">
+              Stats Comparison
             </div>
-            <div className="text-center bg-blue-100 p-4 rounded">
-              <h3 className="text-xl font-semibold">{team1.name}</h3>
-              {team1.abbrev && (
+            {team1.id ? (
+              <div className="text-center p-4 bg-indigo-50 min-h-[120px] flex flex-col justify-center">
+                <h3 className="text-xl font-bold text-indigo-900">{team1.name}</h3>
                 <img
                   src={`https://a.espncdn.com/i/teamlogos/mlb/500/${team1.abbrev.toLowerCase()}.png`}
                   alt={`${team1.abbrev} logo`}
-                  className="w-12 h-12 mx-auto"
+                  className="w-16 h-16 mx-auto mt-2"
                 />
-              )}
-            </div>
-            <div className="text-center bg-blue-100 p-4 rounded">
-              <h3 className="text-xl font-semibold">{team2.name}</h3>
-              {team2.abbrev && (
+              </div>
+            ) : (
+              <div className="text-center p-4 bg-indigo-50 min-h-[120px] flex flex-col justify-center">
+                <h3 className="text-xl font-bold text-indigo-900">{team2.name}</h3>
                 <img
                   src={`https://a.espncdn.com/i/teamlogos/mlb/500/${team2.abbrev.toLowerCase()}.png`}
                   alt={`${team2.abbrev} logo`}
-                  className="w-12 h-12 mx-auto"
+                  className="w-16 h-16 mx-auto mt-2"
                 />
-              )}
-            </div>
+              </div>
+            )}
+            {team1.id && team2.id && (
+              <div className="text-center p-4 bg-indigo-50 min-h-[120px] flex flex-col justify-center">
+                <h3 className="text-xl font-bold text-indigo-900">{team2.name}</h3>
+                <img
+                  src={`https://a.espncdn.com/i/teamlogos/mlb/500/${team2.abbrev.toLowerCase()}.png`}
+                  alt={`${team2.abbrev} logo`}
+                  className="w-16 h-16 mx-auto mt-2"
+                />
+              </div>
+            )}
           </div>
 
-          <StatsTable
-            categories={hittingCategories}
-            stats1={stats1.hitting}
-            stats2={stats2.hitting}
-            team1={team1}
-            team2={team2}
-            parseStat={parseStat}
-            isLeading={isLeading}
-            getValue={getValue}
-          />
+          <div className="p-4 space-y-8">
+            {hittingFirst ? (
+              <>
+                <div>
+                  <h4 className="text-lg font-semibold text-center bg-indigo-100 py-3 rounded-t-lg text-indigo-900">Hitting Stats</h4>
+                  <StatsTable
+                    categories={hittingCategories}
+                    stats1={stats1.hitting}
+                    stats2={stats2.hitting}
+                    team1={team1}
+                    team2={team2}
+                    parseStat={parseStat}
+                    isLeading={isLeading}
+                    getValue={getValue}
+                  />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-center bg-indigo-100 py-3 rounded-t-lg text-indigo-900">Pitching Stats</h4>
+                  <StatsTable
+                    categories={pitchingCategories}
+                    stats1={stats1.pitching}
+                    stats2={stats2.pitching}
+                    team1={team1}
+                    team2={team2}
+                    parseStat={parseStat}
+                    isLeading={isLeading}
+                    getValue={getValue}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <h4 className="text-lg font-semibold text-center bg-indigo-100 py-3 rounded-t-lg text-indigo-900">Pitching Stats</h4>
+                  <StatsTable
+                    categories={pitchingCategories}
+                    stats1={stats1.pitching}
+                    stats2={stats2.pitching}
+                    team1={team1}
+                    team2={team2}
+                    parseStat={parseStat}
+                    isLeading={isLeading}
+                    getValue={getValue}
+                  />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-center bg-indigo-100 py-3 rounded-t-lg text-indigo-900">Hitting Stats</h4>
+                  <StatsTable
+                    categories={hittingCategories}
+                    stats1={stats1.hitting}
+                    stats2={stats2.hitting}
+                    team1={team1}
+                    team2={team2}
+                    parseStat={parseStat}
+                    isLeading={isLeading}
+                    getValue={getValue}
+                  />
+                </div>
+              </>
+            )}
+          </div>
 
-          <StatsTable
-            categories={pitchingCategories}
-            stats1={stats1.pitching}
-            stats2={stats2.pitching}
-            team1={team1}
-            team2={team2}
-            parseStat={parseStat}
-            isLeading={isLeading}
-            getValue={getValue}
-          />
+          <div className="flex justify-center p-4">
+            <button
+              onClick={toggleOrder}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150 ease-in-out hover:scale-105"
+            >
+              {hittingFirst ? "View Pitching First" : "View Hitting First"}
+            </button>
+          </div>
 
-          <p className="text-center text-xs text-gray-500">
+          <p className="text-center text-xs text-gray-500 py-4">
             Data via MLB Stats API © MLBAM
           </p>
         </div>
       ) : (
-        <p className="text-center text-gray-600">
-          Select two teams to compare their stats.
+        <p className="text-center text-gray-600 font-medium">
+          Select teams to compare their stats.
         </p>
       )}
     </div>

@@ -43,17 +43,17 @@ const MlbScores = () => {
   }, []);
 
   if (loading)
-    return <p className="text-center text-gray-600">Loading scores...</p>;
+    return <p className="text-center text-gray-600 font-medium">Loading scores...</p>;
   // Display the scoreboard error from the hook
   if (error && !detailsError)
-    return <p className="text-center text-red-600">{error}</p>;
+    return <p className="text-center text-red-600 font-medium">{error}</p>;
   // Display the game details error if it exists
   if (detailsError)
-    return <p className="text-center text-red-600">{detailsError}</p>;
+    return <p className="text-center text-red-600 font-medium">{detailsError}</p>;
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-xl font-semibold mb-4">MLB Scores</h2>
+    <div className="space-y-8 max-w-4xl mx-auto p-6 bg-gray-50 rounded-2xl shadow-xl">
+      <h2 className="text-2xl font-bold tracking-tight text-indigo-900 text-center">MLB Scores</h2>
       <p className="text-sm text-gray-500 mb-4 text-center">
         Data courtesy of ESPN API © ESPN Enterprises, Inc.
       </p>

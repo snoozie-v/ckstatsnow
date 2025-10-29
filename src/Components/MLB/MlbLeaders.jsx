@@ -23,6 +23,7 @@ const MlbLeaders = () => {
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [preset, setPreset] = useState("custom");
+  const [hittingFirst, setHittingFirst] = useState(true); // New state for toggle
   const limit = 10;
 
   const hittingCategories = [
@@ -357,80 +358,85 @@ const MlbLeaders = () => {
     setOffset((prev) => prev + limit);
   };
 
+  const toggleOrder = () => {
+    setHittingFirst(!hittingFirst);
+  };
+
   const renderTable = (cat, leaders, idxOffset = 0) => {
     return (
       <div key={cat.sortStat} className="mb-8">
         <div className="grid grid-cols-1 gap-4">
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            <div className="flex justify-between items-center bg-blue-100 py-2 px-4">
-              <div className="text-lg font-bold text-blue-900">ckstats</div>
-              <h2 className="text-xl font-semibold">{cat.displayName}</h2>
+          <div className="bg-white shadow-lg rounded-xl overflow-hidden">
+            <div className="flex justify-between items-center bg-indigo-100 py-3 px-6">
+              <div className="text-lg font-bold text-indigo-900">ckstats</div>
+              <h2 className="text-xl font-semibold text-indigo-900">{cat.displayName}</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 table-auto">
                 <thead>
-                  <tr>
-                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">
+                  <tr className="bg-gray-50">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Rank
                     </th>
-                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6"></th>
-                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Player
                     </th>
-                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Team
                     </th>
-                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {cat.displayName}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {leaders.map((leader, idx) => {
-                    return (
-                      <tr key={idx}>
-                        <td className="px-2 py-4 whitespace-nowrap md:px-6">
-                          {idx + 1 + idxOffset}
-                        </td>
-                        <td className="px-2 py-4 md:px-6">
-                          {/* Team logo can be added here if desired */}
-                        </td>
-                        <td className="px-2 py-4 md:px-6">
-                          <div className="flex items-center">
-                            {leader.playerId && (
-                              <img
-                                src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic-sit:headshot:67:current.png/w_213,q_auto:best/v1/people/${leader.playerId}/headshot/67/current`}
-                                alt={`${leader.name} headshot`}
-                                className="w-8 h-8 rounded-full mr-2 object-cover"
-                              />
-                            )}
-                            <button
-                              onClick={() => handlePlayerClick(leader.playerId)}
-                              className="text-blue-600 hover:underline text-left"
-                              disabled={!leader.playerId}
-                              title={
-                                leader.playerId
-                                  ? "View on Baseball-Reference"
-                                  : "Player ID not available"
-                              }
-                            >
-                              {leader.name || "Unknown"}
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-2 py-4 md:px-6">
-                          {leader.team || "-"}
-                        </td>
-                        <td className="px-2 py-4 md:px-6">
-                          {leader.value || "-"}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {leaders.map((leader, idx) => (
+                    <tr
+                      key={idx}
+                      className={`transition duration-150 ease-in-out ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-indigo-50`}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {idx + 1 + idxOffset}
+                      </td>
+                      <td className="px-6 py-4">
+                        {/* Team logo can be added here if desired */}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          {leader.playerId && (
+                            <img
+                              src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic-sit:headshot:67:current.png/w_213,q_auto:best/v1/people/${leader.playerId}/headshot/67/current`}
+                              alt={`${leader.name} headshot`}
+                              className="w-12 h-12 rounded-full mr-3 object-cover"
+                            />
+                          )}
+                          <button
+                            onClick={() => handlePlayerClick(leader.playerId)}
+                            className="text-indigo-600 hover:text-indigo-800 hover:underline text-left font-medium"
+                            disabled={!leader.playerId}
+                            title={
+                              leader.playerId
+                                ? "View on Baseball-Reference"
+                                : "Player ID not available"
+                            }
+                          >
+                            {leader.name || "Unknown"}
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {leader.team || "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        {leader.value || "-"}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-            <p className="text-center text-xs text-gray-500 px-4 py-2">
+            <p className="text-center text-xs text-gray-500 px-6 py-3">
               Data via MLB Stats API © MLBAM
             </p>
           </div>
@@ -439,22 +445,20 @@ const MlbLeaders = () => {
     );
   };
 
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (error) return <p className="text-center text-red-600 font-medium">{error}</p>;
 
   return (
-    <div>
+    <div className="space-y-8 max-w-4xl mx-auto p-6 bg-gray-50 rounded-2xl shadow-xl">
       {validationError && (
-        <p className="text-center text-red-600 mb-4">{validationError}</p>
+        <p className="text-center text-red-600 font-medium mb-4">{validationError}</p>
       )}
-      <div className="mb-4 flex items-center justify-center">
-        <label htmlFor="yearFilter" className="mr-2 text-lg font-medium">
-          Year:
-        </label>
+      <h2 className="text-2xl font-bold tracking-tight text-indigo-900 text-center">MLB Leaders</h2>
+      <div className="flex flex-wrap items-center justify-center space-x-4 text-sm">
+        <label className="whitespace-nowrap font-medium text-gray-800">Year: </label>
         <select
-          id="yearFilter"
           value={year}
           onChange={(e) => setYear(e.target.value)}
-          className="p-2 border border-gray-300 rounded-md"
+          className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
         >
           {[2023, 2024, 2025].map((y) => (
             <option key={y} value={y.toString()}>
@@ -462,45 +466,34 @@ const MlbLeaders = () => {
             </option>
           ))}
         </select>
-      </div>
-      <div className="mb-4 flex items-center justify-center">
-        <label htmlFor="gameTypeFilter" className="mr-2 text-lg font-medium">
-          Game Type:
-        </label>
+        <label className="whitespace-nowrap font-medium text-gray-800">Game Type: </label>
         <select
-          id="gameTypeFilter"
           value={gameType}
           onChange={(e) => setGameType(e.target.value)}
-          className="p-2 border border-gray-300 rounded-md"
+          className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
         >
           <option value="R">Regular Season</option>
           <option value="P">Postseason</option>
         </select>
       </div>
-      <div className="mb-4 flex items-center justify-center">
-        <label htmlFor="leagueFilter" className="mr-2 text-lg font-medium">
-          Filter by League:
-        </label>
+      <div className="flex items-center justify-center space-x-4">
+        <label className="whitespace-nowrap font-medium text-gray-800">Filter by League: </label>
         <select
-          id="leagueFilter"
           value={selectedLeague}
           onChange={(e) => setSelectedLeague(e.target.value)}
-          className="p-2 border border-gray-300 rounded-md"
+          className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
         >
           <option value="MLB">MLB Overall</option>
           <option value="AL">American League (AL)</option>
           <option value="NL">National League (NL)</option>
         </select>
       </div>
-      <div className="mb-4 flex items-center justify-center">
-        <label htmlFor="categoryFilter" className="mr-2 text-lg font-medium">
-          Select Stat:
-        </label>
+      <div className="flex items-center justify-center space-x-4">
+        <label className="whitespace-nowrap font-medium text-gray-800">Select Stat: </label>
         <select
-          id="categoryFilter"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="p-2 border border-gray-300 rounded-md"
+          className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
         >
           <option value="" disabled>
             Select Stat
@@ -513,25 +506,26 @@ const MlbLeaders = () => {
           ))}
         </select>
       </div>
-      <div className="mb-4 flex items-center justify-center">
-        <label className="mr-2">Use Custom Date Range:</label>
+      <div className="flex items-center justify-center space-x-2">
+        <label className="text-sm font-medium text-gray-800">Use Custom Date Range:</label>
         <input
           type="checkbox"
           checked={useDateRange}
           onChange={(e) => setUseDateRange(e.target.checked)}
+          className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
         />
       </div>
       {useDateRange && (
         <>
-          <div className="mb-4 flex items-center justify-center">
-            <label htmlFor="presetFilter" className="mr-2 text-lg font-medium">
+          <div className="flex items-center justify-center space-x-4">
+            <label htmlFor="presetFilter" className="text-sm font-medium text-gray-800">
               Quick Filter:
             </label>
             <select
               id="presetFilter"
               value={preset}
               onChange={handlePresetChange}
-              className="p-2 border border-gray-300 rounded-md"
+              className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
             >
               <option value="custom">Custom</option>
               <option value="today">Today</option>
@@ -540,9 +534,9 @@ const MlbLeaders = () => {
               <option value="lastWeek">Last Week</option>
             </select>
           </div>
-          <div className="flex justify-center space-x-4 mb-4">
+          <div className="flex justify-center space-x-4 mt-4">
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 text-gray-800">
                 Start Date:
               </label>
               <input
@@ -552,11 +546,11 @@ const MlbLeaders = () => {
                   setTempStartDate(e.target.value);
                   setPreset("custom");
                 }}
-                className="p-2 border rounded"
+                className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1 text-gray-800">
                 End Date:
               </label>
               <input
@@ -566,12 +560,12 @@ const MlbLeaders = () => {
                   setTempEndDate(e.target.value);
                   setPreset("custom");
                 }}
-                className="p-2 border rounded"
+                className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
               />
             </div>
             <button
               onClick={applyDateRange}
-              className="p-2 bg-blue-500 text-white rounded mt-6"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg mt-6 hover:bg-indigo-700 transition duration-150 ease-in-out hover:scale-105"
             >
               Apply
             </button>
@@ -579,31 +573,47 @@ const MlbLeaders = () => {
         </>
       )}
       {!selectedCategory ? (
-        <p className="text-center text-gray-600">
+        <p className="text-center text-gray-600 font-medium">
           Select a stat to view leaders.
         </p>
       ) : loading ? (
-        <p className="text-center text-gray-600">Loading leaders...</p>
+        <p className="text-center text-gray-600 font-medium">Loading leaders...</p>
       ) : selectedCategory === "all" ? (
         Object.keys(allLeaders).length === 0 ? (
-          <p className="text-center text-gray-600">
+          <p className="text-center text-gray-600 font-medium">
             No leaders data available for this selection.
           </p>
         ) : (
-          <div className="max-w-2xl mx-auto">
-            {categories.map((cat) => {
-              const leaders = allLeaders[cat.sortStat] || [];
-              if (leaders.length === 0) return null;
-              return renderTable(cat, leaders);
-            })}
-          </div>
+          <>
+            <div className="space-y-8">
+              {hittingFirst
+                ? [...hittingCategories, ...pitchingCategories].map((cat) => {
+                    const leaders = allLeaders[cat.sortStat] || [];
+                    if (leaders.length === 0) return null;
+                    return renderTable(cat, leaders);
+                  })
+                : [...pitchingCategories, ...hittingCategories].map((cat) => {
+                    const leaders = allLeaders[cat.sortStat] || [];
+                    if (leaders.length === 0) return null;
+                    return renderTable(cat, leaders);
+                  })}
+            </div>
+            <div className="flex justify-center p-4">
+              <button
+                onClick={toggleOrder}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150 ease-in-out hover:scale-105"
+              >
+                {hittingFirst ? "View Pitching First" : "View Hitting First"}
+              </button>
+            </div>
+          </>
         )
       ) : statLeaders.length === 0 ? (
-        <p className="text-center text-gray-600">
+        <p className="text-center text-gray-600 font-medium">
           No leaders data available for this selection.
         </p>
       ) : (
-        <div className="max-w-2xl mx-auto">
+        <div className="space-y-8">
           {renderTable(
             categories.find((c) => c.sortStat === selectedCategory),
             statLeaders,
@@ -615,7 +625,7 @@ const MlbLeaders = () => {
         <div className="flex justify-center mt-4">
           <button
             onClick={loadMore}
-            className="p-2 bg-blue-500 text-white rounded"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150 ease-in-out hover:scale-105"
             disabled={loading}
           >
             {loading ? "Loading..." : "Load More"}

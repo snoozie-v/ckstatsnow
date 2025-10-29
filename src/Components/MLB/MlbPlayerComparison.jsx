@@ -587,10 +587,10 @@ const MlbPlayerComparison = () => {
           <div
             className={`grid ${
               player1.id && player2.id ? "grid-cols-3" : "grid-cols-2"
-            } bg-indigo-800 text-white font-bold`}
+            } bg-sky-800 text-white font-bold`}
           >
             <div className="py-4 px-6 flex items-center justify-center text-lg tracking-wide">
-              Stats Comparison
+
             </div>
             {player1.id ? (
               <PlayerHeader player={player1} />

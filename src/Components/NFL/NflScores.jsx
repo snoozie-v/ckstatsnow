@@ -1,5 +1,3 @@
-// Updated NflScores.jsx (fixed logo path to use team.logo from ESPN API)
-// Place this in ./components/NflScores.jsx
 import { useState, useEffect } from "react";
 import WeekSelector from "../Utilities/WeekSelector";
 import useFetchScores from "../../hooks/useFetchScores";
@@ -117,49 +115,51 @@ const NflScores = () => {
   };
 
   if (loading)
-    return <p className="text-center text-gray-600">Loading scores...</p>;
+    return <p className="text-center text-gray-600 font-medium">Loading scores...</p>;
   if (error && !detailsError)
-    return <p className="text-center text-red-600">{error}</p>;
+    return <p className="text-center text-red-600 font-medium">{error}</p>;
   if (detailsError)
-    return <p className="text-center text-red-600">{detailsError}</p>;
+    return <p className="text-center text-red-600 font-medium">{detailsError}</p>;
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-xl font-semibold mb-4">
-        NFL Scores - {getWeekTitle()}
-      </h2>
-      <p className="text-sm text-gray-500 mb-4 text-center">
-        Data courtesy of ESPN API © ESPN Enterprises, Inc.
-      </p>
-      <WeekSelector
-        selectedWeekStart={selectedWeekStart}
-        onWeekStartChange={setSelectedWeekStart}
-      />
-      {games.length === 0 ? (
-        <p className="text-center text-gray-600">No games this week.</p>
-      ) : (
-        <GameList
-          games={games}
-          onGameClick={fetchGameDetails}
-          getStatusColor={getStatusColor}
-          getStatusContent={getStatusContent}
-          gridLayout={isWideScreen}
+    <div className="max-w-6xl mx-auto p-6 bg-gray-50 rounded-2xl shadow-2xl space-y-12">
+      <div className="bg-white shadow-xl rounded-2xl p-6">
+        <h2 className="text-2xl font-bold tracking-tight text-indigo-900 mb-6">
+          NFL Scores - {getWeekTitle()}
+        </h2>
+        <p className="text-center text-xs text-gray-500 py-4">
+          Data courtesy of ESPN API © ESPN Enterprises, Inc.
+        </p>
+        <WeekSelector
+          selectedWeekStart={selectedWeekStart}
+          onWeekStartChange={setSelectedWeekStart}
+        />
+        {games.length === 0 ? (
+          <p className="text-center text-gray-600 font-medium">No games this week.</p>
+        ) : (
+          <GameList
+            games={games}
+            onGameClick={fetchGameDetails}
+            getStatusColor={getStatusColor}
+            getStatusContent={getStatusContent}
+            gridLayout={isWideScreen}
+            getTeamInfo={(competitor) => ({
+              name: competitor.team.displayName,
+              logo: competitor.team.logo,
+            })}
+          />
+        )}
+        <GameModal
+          selectedGame={selectedGame}
+          onClose={() => setSelectedGame(null)}
           getTeamInfo={(competitor) => ({
             name: competitor.team.displayName,
-            logo: competitor.team.logo,
+            logo: competitor.team.logos?.[0]?.href || "", // Correct path for summary data
           })}
-        />
-      )}
-      <GameModal
-        selectedGame={selectedGame}
-        onClose={() => setSelectedGame(null)}
-        getTeamInfo={(competitor) => ({
-          name: competitor.team.displayName,
-          logo: competitor.team.logos?.[0]?.href || "", // Correct path for summary data
-        })}
-      >
-        <NflGameDetails details={selectedGame} />
-      </GameModal>
+        >
+          <NflGameDetails details={selectedGame} />
+        </GameModal>
+      </div>
     </div>
   );
 };

@@ -24,6 +24,18 @@ const HomePage = () => {
         >
           NFL Stats
         </Link>
+        <Link
+          to="/nhl"
+          className="bg-blue-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-green-700 transition duration-300 text-xl shadow-lg"
+        >
+          NHL Stats
+        </Link>
+        <Link
+          to="/nba"
+          className="bg-green-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-green-700 transition duration-300 text-xl shadow-lg"
+        >
+          NBA Stats
+        </Link>
       </div>
     </div>
   );

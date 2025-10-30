@@ -79,18 +79,18 @@ const MlbPlayoffMatchups = () => {
 
   if (loading)
     return (
-      <p className="text-center text-gray-600">Loading playoff matchups...</p>
+      <p className="text-center text-gray-600 font-medium">Loading playoff matchups...</p>
     );
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (error) return <p className="text-center text-red-600 font-medium">{error}</p>;
   if (!playoffData || playoffData.length === 0)
     return (
-      <p className="text-center text-gray-600">No playoff data available.</p>
+      <p className="text-center text-gray-600 font-medium">No playoff data available.</p>
     );
 
   return (
     <>
-      <h1 className="text-2xl font-bold my-4">Playoff Matchups</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-6">
+      <h1 className="text-2xl font-bold tracking-tight text-indigo-900 mb-6">Playoff Matchups</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
         {playoffData.map((seriesItem, index) => {
           if (seriesItem.games.length === 0) return null;
           const series = seriesItem.series;
@@ -144,47 +144,43 @@ const MlbPlayoffMatchups = () => {
           return (
             <div
               key={index}
-              className={`${
-                isOver ? "bg-green-200" : "bg-white"
-              } shadow-md rounded-lg overflow-hidden p-4 ${
-                gameType === "W" ? "sm:col-span-2" : ""
-              }`}
+              className={`bg-white shadow-xl rounded-2xl overflow-hidden p-6 ${isOver ? "bg-indigo-50" : ""} ${gameType === "W" ? "md:col-span-2" : ""}`}
             >
-              <h2 className="text-lg font-semibold mb-2">
+              <h2 className="text-xl font-semibold text-indigo-900 mb-4 text-center">
                 {leagueName ? leagueName + " " : ""}
                 {roundName}
                 {statusText}
               </h2>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center">
                   {homeAbbrev && (
                     <img
                       src={`https://a.espncdn.com/i/teamlogos/mlb/500/${homeAbbrev}.png`}
                       alt={homeTeam.name}
-                      className="w-8 h-8 mr-2"
+                      className="w-12 h-12 mr-3 flex-shrink-0"
                     />
                   )}
-                  {!homeAbbrev && <span className="w-8 h-8 mr-2"></span>}
-                  <span className={homeWins > awayWins ? "font-bold" : ""}>
+                  {!homeAbbrev && <span className="w-12 h-12 mr-3"></span>}
+                  <span className={`text-base font-semibold text-gray-900 ${homeWins > awayWins ? "font-bold" : ""}`}>
                     {homeTeam.name} ({homeWins})
                   </span>
                 </div>
-                <span className="mx-4">vs</span>
+                <span className="text-lg font-medium text-gray-700 mx-6">vs</span>
                 <div className="flex items-center">
-                  <span className={awayWins > homeWins ? "font-bold" : ""}>
+                  <span className={`text-base font-semibold text-gray-900 mr-3 ${awayWins > homeWins ? "font-bold" : ""}`}>
                     {awayTeam.name} ({awayWins})
                   </span>
                   {awayAbbrev && (
                     <img
                       src={`https://a.espncdn.com/i/teamlogos/mlb/500/${awayAbbrev}.png`}
                       alt={awayTeam.name}
-                      className="w-8 h-8 ml-2"
+                      className="w-12 h-12 flex-shrink-0"
                     />
                   )}
                 </div>
               </div>
               {winnerMessage && (
-                <p className="mt-2 text-center font-bold p4">{winnerMessage}</p>
+                <p className="text-center text-base font-bold text-indigo-900">{winnerMessage}</p>
               )}
             </div>
           );

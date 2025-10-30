@@ -60,10 +60,26 @@ export const fetchNflStandings = async (season) => {
   );
 };
 
+export const fetchNbaStandings = async (season) => {
+  const url = `https://cdn.espn.com/core/nba/standings/_/season/${season}?xhr=1`;
+  const response = await axios.get(url);
+  // Flatten the nested structure to get a simple array of all team entries
+  return (
+    response.data?.content?.standings?.groups?.flatMap((conf) =>
+      conf.standings.entries.map((entry) => ({
+        ...entry,
+        conference: conf.name,
+      }))
+    ) || []
+  );
+};
+
 export const fetchNflTeamStats = async (year) => {
-  const response = await fetch(`https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/statistics/byteam?season=${year}&seasontype=2`);
+  const response = await fetch(
+    `https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/statistics/byteam?season=${year}&seasontype=2`
+  );
   if (!response.ok) {
-    throw new Error('Failed to fetch team stats');
+    throw new Error("Failed to fetch team stats");
   }
   const data = await response.json();
   return data.teams; // Array of { team: {id, ...}, categories: [...] }

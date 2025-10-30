@@ -2,6 +2,9 @@
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 import MlbPage from "./Components/MLB/MlbPage";
 import NflPage from "./Components/NFL/NflPage";
+import NhlPage from "./Components/NHL/NhlPage";
+import NbaPage from "./Components/NBA/NbaPage";
+
 import HomePage from "./Components/HomePage";
 
 function App() {
@@ -18,6 +21,12 @@ function App() {
           <Link to="/nfl" className="text-sm hover:underline">
             NFL
           </Link>
+          <Link to="/nhl" className="text-sm hover:underline">
+            NHL
+          </Link>
+          <Link to="/nba" className="text-sm hover:underline">
+            NBA
+          </Link>
           {/* <Link to="/ncaa" className="text-sm hover:underline">NCAA FB</Link> */}
         </nav>
       </header>
@@ -26,6 +35,8 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/mlb/:view?" element={<MlbPage />} />
           <Route path="/nfl/:view?" element={<NflPage />} />
+          <Route path="/nhl/:view?" element={<NhlPage />} />
+          <Route path="/nba/:view?" element={<NbaPage />} />
           {/* <Route path="/ncaa" element={<NcaaPage />} /> */}
         </Routes>
       </main>

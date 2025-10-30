@@ -48,8 +48,8 @@ const NflStandings = () => {
     fetchPlayoff();
   }, [selectedSeason]);
 
-  if (loading) return <p className="text-center text-gray-600">Loading standings...</p>;
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (loading) return <p className="text-center text-gray-600 font-medium">Loading standings...</p>;
+  if (error) return <p className="text-center text-red-600 font-medium">{error}</p>;
 
   const afcConference = standings.find(conf => conf.abbreviation === 'AFC') || {};
   const nfcConference = standings.find(conf => conf.abbreviation === 'NFC') || {};
@@ -58,140 +58,144 @@ const NflStandings = () => {
   const nfcDivisions = nfcConference.groups || [];
 
   const renderDivision = (division) => (
-    <div key={division.id || division.name} className="bg-white shadow-md rounded-lg overflow-hidden">
-      <h3 className="text-xl font-semibold bg-blue-100 py-2 px-4">{division.name}</h3>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">W</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">L</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">T</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PCT</th>
+    <div key={division.id || division.name} className="bg-white shadow-xl rounded-2xl overflow-hidden">
+      <h3 className="text-xl font-semibold bg-indigo-100 text-indigo-900 py-4 px-6 text-center">{division.name}</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full table-fixed divide-y divide-gray-200">
+          <thead className="bg-indigo-50">
+            <tr>
+              <th className="w-3/5 px-4 py-3 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">Team</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">W</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">L</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">T</th>
+              {/* <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">PCT</th> */}
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">PF</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">PA</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">Net Pts</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {division.standings.entries.map((entry, index) => {
+              const team = entry.team;
+              const stats = entry.stats || [];
+              const rowClass = index === 0 ? 'bg-indigo-50' : (index % 2 === 0 ? 'bg-gray-50' : 'bg-white');
+              const logoUrl = team.logos?.[0]?.href || `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation?.toLowerCase() ?? ''}.png`;
 
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PF</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PA</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Net Pts</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {division.standings.entries.map((entry, index) => {
-            const team = entry.team;
-            const stats = entry.stats || [];
-            const rowClass = index === 0 ? 'bg-green-100' : '';
-            const logoUrl = team.logos?.[0]?.href || `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation?.toLowerCase() ?? ''}.png`;
-
-            return (
-              <tr key={team.id} className={rowClass}>
-                <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                  <img
-                    src={logoUrl}
-                    alt={`${team.displayName} logo`}
-                    className="w-6 h-6 object-contain mr-2"
-                    onError={(e) => { e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMiIgZmlsbD0iI2U1ZTVlNSIvPjwvc3ZnPg=='; }}
-                  />
-                  {team.displayName}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'wins')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'losses')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'ties')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'winpercent')}</td>
-
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'pointsfor')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'pointsagainst')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'differential')}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+              return (
+                <tr key={team.id} className={`${rowClass} hover:bg-indigo-50 transition duration-150 ease-in-out`}>
+                  <td className="px-4 py-3 whitespace-nowrap flex items-center overflow-hidden">
+                    <img
+                      src={logoUrl}
+                      alt={`${team.displayName} logo`}
+                      className="w-12 h-12 mr-3 flex-shrink-0"
+                    />
+                    <span className="text-base font-semibold text-gray-900 truncate">
+                      {team.displayName}
+                    </span>
+                  </td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'wins')}</td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'losses')}</td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'ties')}</td>
+                  {/* <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'winpercent')}</td> */}
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'pointsfor')}</td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'pointsagainst')}</td>
+                  <td className="px-2 py-3 text-center text-base text-indigo-900">{findStat(stats, 'differential')}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 
   const renderConferencePlayoff = (conf) => (
-    <div key={conf.abbreviation} className="bg-white shadow-md rounded-lg overflow-hidden">
-      <h3 className="text-xl font-semibold bg-blue-100 py-2 px-4">{conf.abbreviation} Playoff Picture</h3>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seed</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">W</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">L</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">T</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PCT</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">DIV</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">CONF</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SOS</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SOV</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {conf.standings.entries.map((entry) => {
-            const team = entry.team;
-            const stats = entry.stats || [];
-            const seed = team.seed || '-';
-            const clincher = team.clincher ? `${team.clincher}` : '';
-            const rowClass = parseInt(seed) <= 7 ? 'bg-green-100' : 'bg-red-100';
-            const logoUrl = team.logos?.[0]?.href || `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation?.toLowerCase() ?? ''}.png`;
+    <div key={conf.abbreviation} className="bg-white shadow-xl rounded-2xl overflow-hidden">
+      <h3 className="text-xl font-semibold bg-indigo-100 text-indigo-900 py-4 px-6 text-center">{conf.abbreviation} Playoff Picture</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full table-fixed divide-y divide-gray-200">
+          <thead className="bg-indigo-50">
+            <tr>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">Seed</th>
+              <th className="w-4/12 px-4 py-3 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">Team</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">W</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">L</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">T</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">PCT</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">DIV</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">CONF</th>
+              {/* <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">SOS</th>
+              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">SOV</th> */}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {conf.standings.entries.map((entry, index) => {
+              const team = entry.team;
+              const stats = entry.stats || [];
+              const seed = entry.team.seed || '-';
+              const clincher = team.clincher ? `${team.clincher}` : '';
+              const rowClass = parseInt(seed) <= 7 ? 'bg-indigo-50' : (index % 2 === 0 ? 'bg-gray-50' : 'bg-white');
+              const logoUrl = team.logos?.[0]?.href || `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation?.toLowerCase() ?? ''}.png`;
 
-            return (
-              <tr key={team.id} className={rowClass}>
-                <td className="px-6 py-4 whitespace-nowrap">{seed}</td>
-                <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                  <img
-                    src={logoUrl}
-                    alt={`${team.displayName} logo`}
-                    className="w-6 h-6 object-contain mr-2"
-                    onError={(e) => { e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMiIgZmlsbD0iI2U1ZTVlNSIvPjwvc3ZnPg=='; }}
-                  />
-                  {team.displayName} {clincher}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'total_wins')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'total_losses')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'total_ties')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'total_winpercent')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'divisionrecord')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'conferencerecord')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'strengthofschedule')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">{findStat(stats, 'strengthofvictory')}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+              return (
+                <tr key={team.id} className={`${rowClass} hover:bg-indigo-50 transition duration-150 ease-in-out`}>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{seed}</td>
+                  <td className="px-4 py-3 whitespace-nowrap flex items-center overflow-hidden">
+                    <img
+                      src={logoUrl}
+                      alt={`${team.displayName} logo`}
+                      className="w-12 h-12 mr-3 flex-shrink-0"
+                    />
+                    <span className="text-base font-semibold text-gray-900 truncate">
+                      {team.displayName} {clincher}
+                    </span>
+                  </td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'total_wins')}</td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'total_losses')}</td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'total_ties')}</td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'total_winpercent')}</td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'divisionrecord')}</td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'conferencerecord')}</td>
+                  {/* <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'strengthofschedule')}</td>
+                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'strengthofvictory')}</td> */}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">NFL Standings - {selectedSeason}</h1>
+    <div className="max-w-6xl mx-auto p-6 bg-gray-50 rounded-2xl shadow-2xl space-y-12">
+      <h1 className="text-2xl font-bold tracking-tight text-indigo-900 mb-6">NFL Standings - {selectedSeason}</h1>
       <div className="mb-4">
-        <label htmlFor="season-select" className="mr-2">Select Season:</label>
+        <label htmlFor="season-select" className="mr-2 text-sm font-medium text-gray-800">Select Season:</label>
         <select
           id="season-select"
           value={selectedSeason}
           onChange={(e) => setSelectedSeason(Number(e.target.value))}
-          className="border rounded px-2 py-1"
+          className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition duration-150"
         >
           {seasons.map(year => (
             <option key={year} value={year}>{year}</option>
           ))}
         </select>
       </div>
-      <h2 className="text-2xl font-bold mb-4">Division Standings</h2>
-      <h3 className="text-xl font-bold mb-2">AFC</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <h2 className="text-2xl font-bold tracking-tight text-indigo-900 mb-6">Division Standings</h2>
+      <h3 className="text-xl font-bold mb-4 text-indigo-900">AFC</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         {afcDivisions.map(renderDivision)}
       </div>
-      <h3 className="text-xl font-bold mb-2">NFC</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <h3 className="text-xl font-bold mb-4 text-indigo-900">NFC</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         {nfcDivisions.map(renderDivision)}
       </div>
       {playoffStandings.length > 0 && (
         <>
-          <h2 className="text-2xl font-bold my-4">Playoff Picture</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <h2 className="text-2xl font-bold tracking-tight text-indigo-900 mb-6">Playoff Picture</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {playoffStandings.map(renderConferencePlayoff)}
           </div>
         </>

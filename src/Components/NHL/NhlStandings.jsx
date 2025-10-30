@@ -10,7 +10,7 @@ const NhlStandings = ({ league }) => {
     try {
       setLoading(true);
       if (league === "nhl") {
-        const date = new Date().toISOString().split('T')[0]; // e.g., '2025-10-29'
+        const date = new Date().toISOString().split('T')[0]; 
         const url = `/nhl-api/v1/standings/${date}`;
         const response = await axios.get(url);
         setData(response.data.standings || []);

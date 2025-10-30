@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getGradient } from "../NHL/nhlUtils";
+// import { getGradient } from "../NHL/nhlUtils";
 import { fetchNhlTeams, fetchNhlTeamStats } from "../../api/nhl";
 
 const teamStatCategories = [

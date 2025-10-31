@@ -2,40 +2,75 @@ import { Link } from "react-router-dom";
 
 const HomePage = () => {
   return (
-    <div className="text-center p-8 mt-10">
-      <h2 className="text-4xl font-bold mb-4 text-gray-800">
-        Welcome to ckstats
-      </h2>
-      <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto">
-        Your one-stop destination for the latest standings, scores, and
-        leaderboards for your favorite sports leagues. Select a sport to get
-        started.
-      </p>
-      <div className="flex flex-col items-center space-y-4 md:flex-row md:justify-center md:space-y-0 md:space-x-6">
-        <Link
-          to="/mlb"
-          className="bg-blue-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-blue-700 transition duration-300 text-xl shadow-lg"
-        >
-          MLB Stats
-        </Link>
-        <Link
-          to="/nfl"
-          className="bg-green-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-green-700 transition duration-300 text-xl shadow-lg"
-        >
-          NFL Stats
-        </Link>
-        <Link
-          to="/nhl"
-          className="bg-blue-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-green-700 transition duration-300 text-xl shadow-lg"
-        >
-          NHL Stats
-        </Link>
-        <Link
-          to="/nba"
-          className="bg-green-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-green-700 transition duration-300 text-xl shadow-lg"
-        >
-          NBA Stats
-        </Link>
+    <div className="max-w-6xl mx-auto p-6 bg-gray-50 rounded-2xl shadow-2xl space-y-12">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold tracking-tight text-indigo-900 mb-6">
+          Welcome to CKStats
+        </h1>
+        <p className="text-lg text-gray-600 font-medium mb-8 max-w-3xl mx-auto">
+          Your ultimate hub for real-time sports insights. Dive into detailed standings, live scores, player leaderboards, team comparisons, and playoff matchups across MLB, NFL, NHL, and NBA. Powered by official APIs for accurate, up-to-date data.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Link
+            to="/mlb"
+            className="bg-white shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition duration-150 ease-in-out hover:scale-105"
+          >
+            <div className="p-6 text-center">
+              <img
+                src="https://a.espncdn.com/i/teamlogos/mlb/500/lad.png"
+                alt="MLB"
+                className="w-16 h-16 mx-auto mb-4"
+              />
+              <h2 className="text-xl font-semibold text-indigo-900 mb-2">MLB Stats</h2>
+              <p className="text-sm text-gray-600">Standings, scores, team comparisons, and playoff brackets</p>
+            </div>
+          </Link>
+          <Link
+            to="/nfl"
+            className="bg-white shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition duration-150 ease-in-out hover:scale-105"
+          >
+            <div className="p-6 text-center">
+              <img
+                src="https://a.espncdn.com/i/teamlogos/nfl/500/kc.png"
+                alt="NFL"
+                className="w-16 h-16 mx-auto mb-4"
+              />
+              <h2 className="text-xl font-semibold text-indigo-900 mb-2">NFL Stats</h2>
+              <p className="text-sm text-gray-600">Standings, live scores, division breakdowns, and playoff pictures</p>
+            </div>
+          </Link>
+          <Link
+            to="/nhl"
+            className="bg-white shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition duration-150 ease-in-out hover:scale-105"
+          >
+            <div className="p-6 text-center">
+              <img
+                src="https://a.espncdn.com/i/teamlogos/nhl/500/tb.png"
+                alt="NHL"
+                className="w-16 h-16 mx-auto mb-4"
+              />
+              <h2 className="text-xl font-semibold text-indigo-900 mb-2">NHL Stats</h2>
+              <p className="text-sm text-gray-600">Conference standings, division leaders, and real-time updates</p>
+            </div>
+          </Link>
+          <Link
+            to="/nba"
+            className="bg-white shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition duration-150 ease-in-out hover:scale-105"
+          >
+            <div className="p-6 text-center">
+              <img
+                src="https://a.espncdn.com/i/teamlogos/nba/500/bos.png"
+                alt="NBA"
+                className="w-16 h-16 mx-auto mb-4"
+              />
+              <h2 className="text-xl font-semibold text-indigo-900 mb-2">NBA Stats</h2>
+              <p className="text-sm text-gray-600">Standings, scores, leaderboards, and team analytics</p>
+            </div>
+          </Link>
+        </div>
+        <p className="text-center text-xs text-gray-500 py-4 mt-8">
+          Data powered by official APIs • Updated in real-time
+        </p>
       </div>
     </div>
   );

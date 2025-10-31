@@ -11,7 +11,7 @@ const HomePage = () => {
         leaderboards for your favorite sports leagues. Select a sport to get
         started.
       </p>
-      <div className="flex justify-center space-x-6">
+      <div className="flex flex-col items-center space-y-4 md:flex-row md:justify-center md:space-y-0 md:space-x-6">
         <Link
           to="/mlb"
           className="bg-blue-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-blue-700 transition duration-300 text-xl shadow-lg"

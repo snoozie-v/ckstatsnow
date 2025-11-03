@@ -61,17 +61,17 @@ const NflStandings = () => {
     <div key={division.id || division.name} className="bg-white shadow-xl rounded-2xl overflow-hidden">
       <h3 className="text-xl font-semibold bg-indigo-100 text-indigo-900 py-4 px-6 text-center">{division.name}</h3>
       <div className="overflow-x-auto">
-        <table className="w-full table-fixed divide-y divide-gray-200">
+        <table className="w-full divide-y divide-gray-200">
           <thead className="bg-indigo-50">
             <tr>
-              <th className="w-3/5 px-4 py-3 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">Team</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">W</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">L</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">T</th>
-              {/* <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">PCT</th> */}
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">PF</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">PA</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">Net Pts</th>
+              <th className="px-4 py-3 text-left text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider">Team</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">W</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">L</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">T</th>
+              {/* <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">PCT</th> */}
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">PF</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">PA</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">Net Pts</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -86,20 +86,20 @@ const NflStandings = () => {
                   <td className="px-4 py-3 whitespace-nowrap flex items-center overflow-hidden">
                     <img
                       src={logoUrl}
-                      alt={`${team.displayName} logo`}
-                      className="w-12 h-12 mr-3 flex-shrink-0"
+                      alt={`${team.name} logo`}
+                      className="w-8 h-8 md:w-12 md:h-12 mr-2 md:mr-3 flex-shrink-0"
                     />
-                    <span className="text-base font-semibold text-gray-900 truncate">
-                      {team.displayName}
+                    <span className="text-sm md:text-base font-semibold text-gray-900 truncate">
+                      {team.name}
                     </span>
                   </td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'wins')}</td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'losses')}</td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'ties')}</td>
-                  {/* <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'winpercent')}</td> */}
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'pointsfor')}</td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'pointsagainst')}</td>
-                  <td className="px-2 py-3 text-center text-base text-indigo-900">{findStat(stats, 'differential')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'wins')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'losses')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'ties')}</td>
+                  {/* <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'winpercent')}</td> */}
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'pointsfor')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'pointsagainst')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base text-indigo-900">{findStat(stats, 'differential')}</td>
                 </tr>
               );
             })}
@@ -113,19 +113,19 @@ const NflStandings = () => {
     <div key={conf.abbreviation} className="bg-white shadow-xl rounded-2xl overflow-hidden">
       <h3 className="text-xl font-semibold bg-indigo-100 text-indigo-900 py-4 px-6 text-center">{conf.abbreviation} Playoff Picture</h3>
       <div className="overflow-x-auto">
-        <table className="w-full table-fixed divide-y divide-gray-200">
+        <table className="w-full divide-y divide-gray-200">
           <thead className="bg-indigo-50">
             <tr>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">Seed</th>
-              <th className="w-4/12 px-4 py-3 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">Team</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">W</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">L</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">T</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">PCT</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">DIV</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">CONF</th>
-              {/* <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">SOS</th>
-              <th className="w-1/12 px-2 py-3 text-center text-sm font-semibold text-indigo-900 uppercase tracking-wider">SOV</th> */}
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">Seed</th>
+              <th className="px-4 py-3 text-left text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider">Team</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">W</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">L</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">T</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">PCT</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">DIV</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">CONF</th>
+              {/* <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">SOS</th>
+              <th className="px-2 py-3 text-center text-xs md:text-sm font-semibold text-indigo-900 uppercase tracking-wider min-w-[40px]">SOV</th> */}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -139,25 +139,25 @@ const NflStandings = () => {
 
               return (
                 <tr key={team.id} className={`${rowClass} hover:bg-indigo-50 transition duration-150 ease-in-out`}>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{seed}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{seed}</td>
                   <td className="px-4 py-3 whitespace-nowrap flex items-center overflow-hidden">
                     <img
                       src={logoUrl}
-                      alt={`${team.displayName} logo`}
-                      className="w-12 h-12 mr-3 flex-shrink-0"
+                      alt={`${team.name} logo`}
+                      className="w-8 h-8 md:w-12 md:h-12 mr-2 md:mr-3 flex-shrink-0"
                     />
-                    <span className="text-base font-semibold text-gray-900 truncate">
-                      {team.displayName} {clincher}
+                    <span className="text-sm md:text-base font-semibold text-gray-900 truncate">
+                      {team.name} {clincher}
                     </span>
                   </td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'total_wins')}</td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'total_losses')}</td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'total_ties')}</td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'total_winpercent')}</td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'divisionrecord')}</td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'conferencerecord')}</td>
-                  {/* <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'strengthofschedule')}</td>
-                  <td className="px-2 py-3 text-center text-base font-medium text-gray-700">{findStat(stats, 'strengthofvictory')}</td> */}
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'total_wins')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'total_losses')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'total_ties')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'total_winpercent')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'divisionrecord')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'conferencerecord')}</td>
+                  {/* <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'strengthofschedule')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'strengthofvictory')}</td> */}
                 </tr>
               );
             })}
@@ -185,17 +185,17 @@ const NflStandings = () => {
       </div>
       <h2 className="text-2xl font-bold tracking-tight text-indigo-900 mb-6">Division Standings</h2>
       <h3 className="text-xl font-bold mb-4 text-indigo-900">AFC</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
         {afcDivisions.map(renderDivision)}
       </div>
       <h3 className="text-xl font-bold mb-4 text-indigo-900">NFC</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
         {nfcDivisions.map(renderDivision)}
       </div>
       {playoffStandings.length > 0 && (
         <>
           <h2 className="text-2xl font-bold tracking-tight text-indigo-900 mb-6">Playoff Picture</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {playoffStandings.map(renderConferencePlayoff)}
           </div>
         </>

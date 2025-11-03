@@ -139,7 +139,7 @@ const MlbPlayoffMatchups = () => {
               homeWins,
               awayWins
             )}`;
-            winnerMessage = `${winner.name} win the series ${seriesScore}`;
+            winnerMessage = `${winner.teamName || winner.name} win the series ${seriesScore}`;
           }
           return (
             <div
@@ -162,13 +162,13 @@ const MlbPlayoffMatchups = () => {
                   )}
                   {!homeAbbrev && <span className="w-12 h-12 mr-3"></span>}
                   <span className={`text-base font-semibold text-gray-900 ${homeWins > awayWins ? "font-bold" : ""}`}>
-                    {homeTeam.name} ({homeWins})
+                    {homeTeam.teamName || homeTeam.name} ({homeWins})
                   </span>
                 </div>
                 <span className="text-lg font-medium text-gray-700 mx-6">vs</span>
                 <div className="flex items-center">
                   <span className={`text-base font-semibold text-gray-900 mr-3 ${awayWins > homeWins ? "font-bold" : ""}`}>
-                    {awayTeam.name} ({awayWins})
+                    {awayTeam.teamName || awayTeam.name} ({awayWins})
                   </span>
                   {awayAbbrev && (
                     <img

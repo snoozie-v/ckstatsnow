@@ -170,11 +170,11 @@ const MlbStandings = ({ league }) => {
                           src={`https://a.espncdn.com/i/teamlogos/mlb/500/${
                             teamAbbrevMap[team.team.id]
                           }.png`}
-                          alt={`${team.team.name} logo`}
+                          alt={`${team.team.teamName || team.team.name} logo`}
                           className="w-12 h-12 mr-3 flex-shrink-0"
                         />
                         <span className="text-xs text-base font-semibold text-gray-900 truncate">
-                          {team.team.name}
+                          {team.team.teamName || team.team.name}
                         </span>
                       </td>
                       <td className="text-center text-base font-medium text-gray-700">
@@ -247,11 +247,11 @@ const MlbStandings = ({ league }) => {
                           src={`https://a.espncdn.com/i/teamlogos/mlb/500/${
                             teamAbbrevMap[team.team.id]
                           }.png`}
-                          alt={`${team.team.name} logo`}
+                          alt={`${team.team.teamName || team.team.name} logo`}
                           className="w-12 h-12 mr-3 flex-shrink-0"
                         />
                         <span className="text-xs font-semibold text-gray-900 truncate">
-                          {team.team.name}
+                          {team.team.teamName || team.team.name}
                         </span>
                       </td>
                       <td className="text-center text-base font-medium text-gray-700">
@@ -328,11 +328,11 @@ const MlbStandings = ({ league }) => {
                           src={`https://a.espncdn.com/i/teamlogos/mlb/500/${
                             teamAbbrevMap[team.team.id]
                           }.png`}
-                          alt={`${team.team.name} logo`}
+                          alt={`${team.team.teamName || team.team.name} logo`}
                           className="w-12 h-12 mr-3 flex-shrink-0"
                         />
                         <span className="text-base font-semibold text-gray-900 truncate">
-                          {team.team.name}
+                          {team.team.teamName || team.team.name}
                         </span>
                       </td>
                       {/* <td className="px-2 py-3 text-center text-base font-medium text-gray-700">

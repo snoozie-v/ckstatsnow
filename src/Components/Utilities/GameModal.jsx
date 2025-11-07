@@ -16,7 +16,7 @@ const GameModal = ({ selectedGame, onClose, getTeamInfo, children }) => {
   const { name: homeName, logo: homeLogo } = finalGetTeamInfo(home);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-sky-800 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header with Logos (reusable part) */}
         <div className="flex items-center justify-between mb-4">

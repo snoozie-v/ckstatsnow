@@ -9,7 +9,7 @@ import MlbTeamComparison from "./MlbTeamComparison";
 
 const MlbPage = () => {
   const { view: paramView } = useParams();
-  const currentView = paramView || "standings";
+  const currentView = paramView || "scores";
   const navigate = useNavigate();
   const title = "MLB";
   const league = "mlb"; // Hardcode for MLB
@@ -33,6 +33,14 @@ const MlbPage = () => {
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
       <div className="flex space-x-4 mb-4 overflow-x-auto">
         <button
+          onClick={() => navigate("/mlb/scores")}
+          className={`px-4 py-2 rounded whitespace-nowrap ${
+            currentView === "scores" ? "bg-sky-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          Scores
+        </button>
+        <button
           onClick={() => navigate("/mlb/standings")}
           className={`px-4 py-2 rounded whitespace-nowrap ${
             currentView === "standings"
@@ -41,14 +49,6 @@ const MlbPage = () => {
           }`}
         >
           Standings
-        </button>
-        <button
-          onClick={() => navigate("/mlb/scores")}
-          className={`px-4 py-2 rounded whitespace-nowrap ${
-            currentView === "scores" ? "bg-sky-600 text-white" : "bg-gray-200"
-          }`}
-        >
-          Scores
         </button>
         <button
           onClick={() => navigate("/mlb/leaders")}

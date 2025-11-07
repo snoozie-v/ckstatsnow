@@ -8,7 +8,7 @@ import NhlTeamComparison from "./NhlTeamComparison";
 
 const NhlPage = () => {
   const { view: paramView } = useParams();
-  const currentView = paramView || "standings";
+  const currentView = paramView || "scores";
   const navigate = useNavigate();
   const title = "NHL";
   const league = "nhl"; // Hardcode for nhl
@@ -32,6 +32,14 @@ const NhlPage = () => {
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
       <div className="flex space-x-4 mb-4 overflow-x-auto">
         <button
+          onClick={() => navigate("/nhl/scores")}
+          className={`px-4 py-2 rounded whitespace-nowrap ${
+            currentView === "scores" ? "bg-sky-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          Scores
+        </button>
+        <button
           onClick={() => navigate("/nhl/standings")}
           className={`px-4 py-2 rounded whitespace-nowrap ${
             currentView === "standings"
@@ -40,14 +48,6 @@ const NhlPage = () => {
           }`}
         >
           Standings
-        </button>
-        <button
-          onClick={() => navigate("/nhl/scores")}
-          className={`px-4 py-2 rounded whitespace-nowrap ${
-            currentView === "scores" ? "bg-sky-600 text-white" : "bg-gray-200"
-          }`}
-        >
-          Scores
         </button>
         <button
           onClick={() => navigate("/nhl/leaders")}

@@ -3,9 +3,9 @@ const MlbGameDetails = ({ details }) => {
 
   const { boxscore, situation, gameInfo, plays } = details;
 
-  const statIndices = {
-    hits: 3, // Index of 'H'
-    rbi: 4, // Index of 'RBI'
+  const getHeadshotUrl = (athleteId) => {
+    if (!athleteId) return '';
+    return `https://a.espncdn.com/i/headshots/mlb/players/full/${athleteId}.png`;
   };
 
   return (
@@ -50,17 +50,25 @@ const MlbGameDetails = ({ details }) => {
               const team = boxscore.teams[index]?.team || {
                 displayName: "Team",
               };
-              const battingStats =
-                teamPlayers.statistics
-                  ?.find((stat) => ["batting", "hitting"].includes(stat.type))
-                  ?.athletes.filter((a) => a.athlete?.displayName) || [];
+              const battingStat = teamPlayers.statistics?.find((stat) =>
+                ["batting", "hitting"].includes(stat.type)
+              );
+              if (!battingStat) return null;
+
+              const names = battingStat.names || battingStat.labels || [];
+              const hitsIndex = names.indexOf("H");
+              const rbiIndex = names.indexOf("RBI");
+
+              if (hitsIndex === -1 || rbiIndex === -1) return null;
+
+              const battingStats = battingStat.athletes || [];
               const finalStats = battingStats
                 .map((athlete) => ({
                   ...athlete,
-                  hits: parseInt(athlete.stats?.[statIndices.hits] || "0"),
-                  rbi: parseInt(athlete.stats?.[statIndices.rbi] || "0"),
+                  hits: parseInt(athlete.stats?.[hitsIndex] || "0", 10),
+                  rbi: parseInt(athlete.stats?.[rbiIndex] || "0", 10),
                 }))
-                .filter((a) => a.stats?.length >= 12)
+                .filter((a) => a.stats?.length === names.length && (a.hits > 0 || a.rbi > 0))
                 .sort((a, b) => b.hits + b.rbi - (a.hits + a.rbi))
                 .slice(0, 3);
 
@@ -77,15 +85,25 @@ const MlbGameDetails = ({ details }) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {finalStats.map((athlete, idx) => (
-                          <tr key={idx}>
-                            <td className="text-left">
-                              {athlete.athlete.displayName}
-                            </td>
-                            <td>{athlete.hits}</td>
-                            <td>{athlete.rbi}</td>
-                          </tr>
-                        ))}
+                        {finalStats.map((athlete, idx) => {
+                          const headshotUrl = getHeadshotUrl(athlete.athlete?.id);
+                          return (
+                            <tr key={idx}>
+                              <td className="text-left flex items-center">
+                                {headshotUrl && (
+                                  <img
+                                    src={headshotUrl}
+                                    alt={athlete.athlete.displayName}
+                                    className="w-6 h-6 rounded-full mr-2 object-contain"
+                                  />
+                                )}
+                                {athlete.athlete.displayName}
+                              </td>
+                              <td>{athlete.hits}</td>
+                              <td>{athlete.rbi}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   ) : (

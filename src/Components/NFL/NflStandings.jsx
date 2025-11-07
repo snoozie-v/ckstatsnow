@@ -154,8 +154,8 @@ const NflStandings = () => {
                   <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'total_losses')}</td>
                   <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'total_ties')}</td>
                   <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'total_winpercent')}</td>
-                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'divisionrecord')}</td>
-                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'conferencerecord')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">{findStat(stats, 'divisionrecord')}</td>
+                  <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700 whitespace-nowrap">{findStat(stats, 'conferencerecord')}</td>
                   {/* <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'strengthofschedule')}</td>
                   <td className="px-2 py-3 text-center text-sm md:text-base font-medium text-gray-700">{findStat(stats, 'strengthofvictory')}</td> */}
                 </tr>

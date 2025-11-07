@@ -87,11 +87,28 @@ const MlbPlayoffMatchups = () => {
       <p className="text-center text-gray-600 font-medium">No playoff data available.</p>
     );
 
+  const roundOrder = {
+    W: 1,
+    L: 2,
+    D: 3,
+    F: 4,
+  };
+
+  const sortedPlayoffData = [...playoffData].sort((a, b) => {
+    const orderA = roundOrder[a.series.gameType];
+    const orderB = roundOrder[b.series.gameType];
+    if (orderA !== orderB) return orderA - orderB;
+    // Same round, sort by league ID (AL 103 before NL 104)
+    const leagueA = a.games[0].teams.home.team.league?.id || a.games[0].teams.away.team.league?.id;
+    const leagueB = b.games[0].teams.home.team.league?.id || b.games[0].teams.away.team.league?.id;
+    return leagueA - leagueB;
+  });
+
   return (
     <>
       <h1 className="text-2xl font-bold tracking-tight text-indigo-900 mb-6">Playoff Matchups</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
-        {playoffData.map((seriesItem, index) => {
+        {sortedPlayoffData.map((seriesItem, index) => {
           if (seriesItem.games.length === 0) return null;
           const series = seriesItem.series;
           const gameType = series.gameType;

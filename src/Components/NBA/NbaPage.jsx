@@ -8,7 +8,7 @@ import NbaTeamComparison from "./NbaTeamComparison";
 
 const NbaPage = () => {
   const { view: paramView } = useParams();
-  const currentView = paramView || "standings";
+  const currentView = paramView || "scores";
   const navigate = useNavigate();
   const title = "NBA";
   const league = "nba";
@@ -30,6 +30,14 @@ const NbaPage = () => {
     <div>
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
       <div className="flex space-x-4 mb-4 overflow-x-auto">
+                <button
+          onClick={() => navigate("/nba/scores")}
+          className={`px-4 py-2 rounded whitespace-nowrap ${
+            currentView === "scores" ? "bg-sky-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          Scores
+        </button>       
         <button
           onClick={() => navigate("/nba/standings")}
           className={`px-4 py-2 rounded whitespace-nowrap ${
@@ -39,14 +47,6 @@ const NbaPage = () => {
           }`}
         >
           Standings
-        </button>
-        <button
-          onClick={() => navigate("/nba/scores")}
-          className={`px-4 py-2 rounded whitespace-nowrap ${
-            currentView === "scores" ? "bg-sky-600 text-white" : "bg-gray-200"
-          }`}
-        >
-          Scores
         </button>
         <button
           onClick={() => navigate("/nba/leaders")}

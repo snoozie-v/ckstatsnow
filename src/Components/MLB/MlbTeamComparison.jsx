@@ -33,7 +33,7 @@ const StatsTable = ({
   isLeading,
   getValue,
 }) => (
-  <table className="w-full table-fixed bg-white shadow-lg rounded-xl overflow-hidden border-collapse">
+  <table className="w-full table-fixed bg-white shadow-lg rounded-b-xl overflow-hidden border-collapse">
     <tbody className="divide-y divide-gray-200">
       {categories.map((cat, index) => {
         const val1 = getValue(stats1, cat.valueKey);
@@ -545,7 +545,7 @@ const MlbTeamComparison = () => {
             </div>
             {team1.id ? (
               <div className="text-center p-4 bg-indigo-50 min-h-[120px] flex flex-col justify-center">
-                <h3 className="text-xl font-bold text-indigo-900">{team1.name}</h3>
+                {/* <h3 className="text-xl font-bold text-indigo-900">{team1.name}</h3> */}
                 <img
                   src={`https://a.espncdn.com/i/teamlogos/mlb/500/${team1.abbrev.toLowerCase()}.png`}
                   alt={`${team1.abbrev} logo`}
@@ -554,7 +554,7 @@ const MlbTeamComparison = () => {
               </div>
             ) : (
               <div className="text-center p-4 bg-indigo-50 min-h-[120px] flex flex-col justify-center">
-                <h3 className="text-xl font-bold text-indigo-900">{team2.name}</h3>
+                {/* <h3 className="text-xl font-bold text-indigo-900">{team2.name}</h3> */}
                 <img
                   src={`https://a.espncdn.com/i/teamlogos/mlb/500/${team2.abbrev.toLowerCase()}.png`}
                   alt={`${team2.abbrev} logo`}
@@ -564,7 +564,7 @@ const MlbTeamComparison = () => {
             )}
             {team1.id && team2.id && (
               <div className="text-center p-4 bg-indigo-50 min-h-[120px] flex flex-col justify-center">
-                <h3 className="text-xl font-bold text-indigo-900">{team2.name}</h3>
+                {/* <h3 className="text-xl font-bold text-indigo-900">{team2.name}</h3> */}
                 <img
                   src={`https://a.espncdn.com/i/teamlogos/mlb/500/${team2.abbrev.toLowerCase()}.png`}
                   alt={`${team2.abbrev} logo`}

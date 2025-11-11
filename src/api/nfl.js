@@ -10,7 +10,8 @@ export const fetchNflTeams = async (season) => {
   const teamRefs = response.data.items;
   const teams = await Promise.all(
     teamRefs.map(async (item) => {
-      const teamRes = await axios.get(item.$ref);
+      const secureRef = item.$ref.replace(/^http:/, 'https:');
+      const teamRes = await axios.get(secureRef);
       return teamRes.data;
     })
   );
@@ -39,7 +40,8 @@ export const fetchNflPlayerDetails = async (playerId) => {
   const response = await axios.get(`${NFL_CORE_URL}/athletes/${playerId}`);
   const player = response.data;
   if (player.team && player.team.$ref) {
-    const teamRes = await axios.get(player.team.$ref);
+    const secureRef = player.team.$ref.replace(/^http:/, 'https:');
+    const teamRes = await axios.get(secureRef);
     player.currentTeam = teamRes.data;
   }
   return player || null;
@@ -133,7 +135,8 @@ export const fetchNflPlayoffData = async (year) => {
   const eventRefs = response.data.items;
   const series = await Promise.all(
     eventRefs.map(async (item) => {
-      const eventRes = await axios.get(item.$ref);
+      const secureRef = item.$ref.replace(/^http:/, 'https:');
+      const eventRes = await axios.get(secureRef);
       // Optionally hydrate with boxscore if needed
       return eventRes.data;
     })

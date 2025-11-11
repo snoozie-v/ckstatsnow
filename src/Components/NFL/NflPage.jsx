@@ -68,7 +68,7 @@ const NflPage = () => {
         >
           Player Comparison
         </button>
-        {/* <button
+        <button
           onClick={() => navigate("/nfl/team-comparison")}
           className={`px-4 py-2 rounded whitespace-nowrap ${
             currentView === "team-comparison"
@@ -77,13 +77,13 @@ const NflPage = () => {
           }`}
         >
           Team Comparison
-        </button> */}
+        </button>
       </div>
       {currentView === "standings" && <NflStandings />}
       {currentView === "scores" && <NflScores />}
       {currentView === "leaders" && <NflLeaders />}
       {currentView === "player-comparison" && <NflPlayerComparison />}
-      {/* {currentView === "team-comparison" && <NflTeamComparison />} */}
+      {currentView === "team-comparison" && <NflTeamComparison />}
     </div>
   );
 };

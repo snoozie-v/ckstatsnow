@@ -5,16 +5,33 @@ const NflGameDetails = ({ details }) => {
   const lastPlay = drives?.current?.plays?.slice(-1)[0];
 
   const renderPlayerStats = (teamPlayers, statType, statName) => {
+    const statsSection = teamPlayers.statistics?.find((s) => s.name === statType);
+    if (!statsSection) return null;
+
     const stats =
-      teamPlayers.statistics
-        ?.find((s) => s.name === statType)
-        ?.athletes.filter(
-          (a) => a.stats.length > 0 && parseFloat(a.stats[0]) > 0
-        )
-        .sort((a, b) => parseFloat(b.stats[0]) - parseFloat(a.stats[0]))
+      statsSection.athletes
+        .filter((a) => a.stats.length > 0 && parseFloat(a.stats[0]) > 0)
+        .sort((a, b) => parseFloat(b.stats[1]) - parseFloat(a.stats[1]))
         .slice(0, 3) || [];
 
     if (stats.length === 0) return null;
+
+    const getFormattedStats = (player, statType) => {
+      const s = player.stats;
+      let formatted = "";
+      if (statType === "passing") {
+        formatted = `${s[0]}, ${s[1]} YDS`;
+        if (parseInt(s[3]) > 0) formatted += `, ${s[3]} TD`;
+        if (parseInt(s[4]) > 0) formatted += `, ${s[4]} INT`;
+      } else if (statType === "rushing") {
+        formatted = `${s[0]} CAR, ${s[1]} YDS`;
+        if (parseInt(s[3]) > 0) formatted += `, ${s[3]} TD`;
+      } else if (statType === "receiving") {
+        formatted = `${s[0]} REC, ${s[1]} YDS`;
+        if (parseInt(s[3]) > 0) formatted += `, ${s[3]} TD`;
+      }
+      return formatted;
+    };
 
     return (
       <div className="mt-2">
@@ -24,7 +41,7 @@ const NflGameDetails = ({ details }) => {
             {stats.map((player) => (
               <tr key={player.athlete.id}>
                 <td>{player.athlete.displayName}</td>
-                <td className="text-right">{player.stat}</td>
+                <td className="text-right">{getFormattedStats(player, statType)}</td>
               </tr>
             ))}
           </tbody>
